@@ -10,10 +10,10 @@ async function LevelGate({ children, allowedLevel }: Level) {
   const user = await useCurrentLevel();
 
   if (user !== allowedLevel) {
-    return <>CANNOT ALLOWED TO SEE</>;
+    return <> </>;
   }
 
-  return <div>{children}</div>;
+  return <div className="">{children}</div>;
 }
 
 export default LevelGate;

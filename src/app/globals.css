@@ -59,17 +59,16 @@
   }
 }
 
-* {
+ 
+
+ * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-} 
+}
 
-  
-html,
-body {
-  @apply min-h-screen  min-w-fit bg-white text-black
- 
+:root {
+  @apply bg-white text-black h-[100vh]
 }
 
  

@@ -82,7 +82,13 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("daisyui")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("daisyui"),
+    require("postcss-import"),
+    require("autoprefixer"),
+    require("tailwindcss"),
+  ],
 } satisfies Config;
 
 export default config;

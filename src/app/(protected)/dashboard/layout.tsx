@@ -16,8 +16,8 @@ export default async function Protect_Layout({
 }) {
   const user = await currentUser();
   return (
-    <main className={inter.className}>
+    <section className={clsx(inter.className, "min-h-screen")}>
       <Sidebar user={user!}>{children}</Sidebar>
-    </main>
+    </section>
   );
 }

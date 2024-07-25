@@ -4,6 +4,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "../../auth";
 import toast, { Toaster } from "react-hot-toast";
+import clsx from "clsx";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,14 @@ export default async function RootLayout({
   return (
     <SessionProvider session={session}>
       <html lang="en">
-        <body className={inter.className}>{children}</body>
+        <body
+          className={
+            (clsx("inset-0 min-h-screen bg-background font-sans antialiased"),
+            inter.className)
+          }
+        >
+          <main className="mx-auto flex-grow">{children}</main>
+        </body>
       </html>
     </SessionProvider>
   );

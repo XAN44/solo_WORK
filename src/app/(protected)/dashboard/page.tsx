@@ -9,11 +9,13 @@ import { MyTeam } from "../../../components/ui/dashboard/myteam";
 
 async function Page() {
   return (
-    <div className="flex h-full w-full items-start justify-start">
-      <LevelGate allowedLevel={UserLevel.Admin}>
-        <Admin />
-      </LevelGate>
-      <MyTeam />
+    <div className="h-full w-full">
+      <div className="flex flex-col space-y-3 md:flex-row md:space-x-3 md:space-y-0">
+        <LevelGate allowedLevel={UserLevel.Admin}>
+          <Admin />
+        </LevelGate>
+        <MyTeam />
+      </div>
     </div>
   );
 }
