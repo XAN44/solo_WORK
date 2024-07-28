@@ -61,14 +61,11 @@
 
  
 
- * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+ html { min-height: 100vh; @apply bg-white }
+ body {min-height: 100% }
 
 :root {
-  @apply bg-white text-black h-[100vh]
+  @apply bg-white text-black 
 }
 
  

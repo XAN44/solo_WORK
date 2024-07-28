@@ -6,6 +6,8 @@ import Admin from "../../../components/ui/dashboard/admin";
 import LevelGate from "../../auth/Level-Gate";
 import { UserLevel } from "@prisma/client";
 import { MyTeam } from "../../../components/ui/dashboard/myteam";
+import Attendence from "../../../components/ui/dashboard/attendence";
+import { markAbsentUsers } from "../../../../action/create-attendenceAbset";
 
 async function Page() {
   return (
@@ -15,6 +17,9 @@ async function Page() {
           <Admin />
         </LevelGate>
         <MyTeam />
+        <LevelGate allowedLevel={UserLevel.Supervisor}>
+          <Attendence />
+        </LevelGate>
       </div>
     </div>
   );

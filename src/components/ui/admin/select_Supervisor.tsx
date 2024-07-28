@@ -19,7 +19,7 @@ import MultipleSelector, { Option } from "../multipleSelect";
 import { Button } from "../button";
 
 import { useEffect, useState, useTransition } from "react";
-import { CreateTeamByAdmin } from "../../../../data/create-team";
+
 import { DateTimePicker } from "../date-time-picker";
 
 import { GetMember } from "../../../../data/fetch-member";
@@ -37,6 +37,7 @@ import { MdError, MdSend } from "react-icons/md";
 import { GiConfirmed } from "react-icons/gi";
 import toast from "react-hot-toast";
 import { DepartMent } from "../../../lib/select";
+import { CreateTeamByAdmin } from "../../../../action/create-team";
 
 export const SelectSuperVisor = () => {
   const form = useForm<z.infer<typeof createTeamSchema>>({
@@ -46,7 +47,7 @@ export const SelectSuperVisor = () => {
       supervisor: "",
       project: "",
       member: [],
-      report: "",
+      detail: "",
       startAt: undefined,
       endAt: undefined,
     },
@@ -108,7 +109,9 @@ export const SelectSuperVisor = () => {
   const onSubmit = (value: z.infer<typeof createTeamSchema>) => {
     startTransition(() => {
       CreateTeamByAdmin(value).then((data) => {
+        // TODO : !! หมายถึงการกลับค่าให้กลายเป็นเท็จ เช่น !!true = true !!false = false
         const isError = !!data?.error;
+
         toast.custom(
           (t) => (
             <AnimatePresence>
@@ -143,9 +146,12 @@ export const SelectSuperVisor = () => {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="flex flex-col space-y-10">
+    <>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col items-center justify-center space-y-8"
+        >
           <FormField
             control={form.control}
             name="department"
@@ -243,7 +249,7 @@ export const SelectSuperVisor = () => {
           />
           <FormField
             control={form.control}
-            name="report"
+            name="detail"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Detail</FormLabel>
@@ -255,7 +261,7 @@ export const SelectSuperVisor = () => {
             )}
           />
 
-          <div className="flex space-x-6">
+          <div className="flex flex-col space-y-4 md:flex-row md:space-x-6 md:space-y-0">
             <FormField
               control={form.control}
               name="startAt"
@@ -289,15 +295,13 @@ export const SelectSuperVisor = () => {
               )}
             />
           </div>
-          {/* <FormSuccess message={success} />
-          <FormError message={error} /> */}
-        </div>
-        <div className="mt-6 flex items-center justify-center">
-          <Button type="submit" disabled={isPending}>
-            {isPending ? <ClipLoader size={24} color="#ffffff" /> : "Submit"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="mt-6 flex items-center justify-center">
+            <Button type="submit" disabled={isPending}>
+              {isPending ? <ClipLoader size={24} color="#ffffff" /> : "Submit"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 };

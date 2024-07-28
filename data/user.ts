@@ -37,6 +37,9 @@ export const getUserById = async (id: string) => {
     const user = await db.user.findUnique({
       where: { id },
       select: {
+        id: true,
+        first_name: true,
+        last_name: true,
         username: true,
         password: true,
         emailVerified: true,

@@ -8,11 +8,13 @@ interface Props {
 
 export default function Sidebar({ children, user }: Props) {
   return (
-    <div className="p-3">
-      <div className="fixed z-50 h-full w-28">
+    <section>
+      <div className="fixed left-4 top-2 z-50 w-1">
         <Sidebar_Body user={user} />
       </div>
-      <main className="h-full w-full p-16">{children}</main>
-    </div>
+      <section className="h-full w-screen p-10 md:w-full md:p-32">
+        {children}
+      </section>
+    </section>
   );
 }

@@ -20,17 +20,13 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
   return (
-    <SessionProvider session={session}>
-      <html lang="en">
-        <body
-          className={
-            (clsx("inset-0 min-h-screen bg-background font-sans antialiased"),
-            inter.className)
-          }
-        >
-          <main className="mx-auto flex-grow">{children}</main>
+    <html lang="en">
+      <SessionProvider session={session}>
+        <body className={inter.className}>
+          <main>{children}</main>
+          <Toaster />
         </body>
-      </html>
-    </SessionProvider>
+      </SessionProvider>
+    </html>
   );
 }

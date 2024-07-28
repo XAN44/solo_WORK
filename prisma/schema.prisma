@@ -40,7 +40,10 @@ model User {
 
   accounts   Account[]
   teamMember teamMember[]
+
+  attendance attendance[]
   task       task[]
+  team       team[]
 
   @@map("users")
 }
@@ -57,7 +60,10 @@ model team {
   project    String
   startAt    DateTime
   endAt      DateTime
-  status     StatusTeam
+  status     StatusTeam?
+  detail     String
+  adminId    String?
+  admin      User?        @relation(fields: [adminId], references: [id])
 }
 
 model teamMember {
@@ -76,16 +82,76 @@ enum typeOfWork {
   WorkFormOffice
 }
 
+enum Attendance {
+  Absent
+  Leave
+  Present
+  Late
+}
+
+enum TypeLeave {
+  SICK // ลาป่วย
+  PERSONAL // ลากิจ
+  VACATION // ลาพักร้อน
+  MATERNITY // ลาคลอด
+  PATERNITY // ลาพ่อ
+  BEREAVEMENT // ลางานศพ
+  STUDY // ลาศึกษาต่อ
+}
+
+enum ApprovalStatus {
+  PENDING // รอการอนุมัติ
+  APPROVED // อนุมัติแล้ว
+  REJECTED // ปฏิเสธ
+}
+
+model attendance {
+  id        String     @id @default(cuid())
+  title     String?
+  dateIn    DateTime?
+  dateOut   DateTime?
+  type      Attendance
+  typeleave TypeLeave?
+  tel       String?
+  reason    String?
+
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  statusLeave ApprovalStatus?
+  createAt    DateTime?
+}
+
+enum CreateAt {
+  Backdate
+  Normal
+}
+
+// Pending: ใช้เมื่องานยังไม่ได้เริ่มทำหรือรอการเริ่มต้น
+// InProgress: ใช้เมื่องานกำลังดำเนินการอยู่
+// Completed: ใช้เมื่องานเสร็จสมบูรณ์แล้ว
+// OnHold: ใช้เมื่องานถูกหยุดชั่วคราวหรือรอการตัดสินใจ
+// Cancelled: ใช้เมื่องานถูกยกเลิก
+
+enum StatusTask {
+  pending
+  Completed
+  InProgress
+  OnHold
+  Cancelled
+}
+
 model task {
   id          String     @id @default(cuid())
   title       String
   description String
   startAt     DateTime
   endAt       DateTime
+  createAt    CreateAt
   typeOfWork  typeOfWork
-  status      String
-  userId      String
-  user        User?      @relation(fields: [userId], references: [id])
+  status      StatusTask
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }
 
 model Account {

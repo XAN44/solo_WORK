@@ -12,7 +12,7 @@ export const CreateTeamByAdmin = async (
   value: z.infer<typeof createTeamSchema>,
 ) => {
   const session = await useCurrentLevel();
-
+  const user = await auth();
   if (session !== "Admin") {
     return null;
   }
@@ -23,7 +23,7 @@ export const CreateTeamByAdmin = async (
     return { error: "invalid field" };
   }
 
-  const { department, supervisor, member, project, report, startAt, endAt } =
+  const { department, supervisor, member, project, detail, startAt, endAt } =
     validateField.data;
 
   try {
@@ -58,6 +58,8 @@ export const CreateTeamByAdmin = async (
       },
     });
 
+    const adminId = await user?.user.id;
+
     // TODO : สร้างทีม
     await db.team.create({
       data: {
@@ -65,6 +67,8 @@ export const CreateTeamByAdmin = async (
         project,
         startAt,
         endAt,
+        detail,
+        adminId,
         member: {
           create: [
             {
@@ -92,9 +96,16 @@ export const CreateTeamByAdmin = async (
         },
       },
       select: {
+        id: true,
         email: true,
+        username: true,
       },
     });
+
+    // TODO : หาผู้ใช้ที่เป็น supervisor
+    const supervisorUser = users.find((user) => user.id === supervisor);
+    // TODO : หาผู้ใช้ที่ไม่ได้เป็น Supervisor
+    const teamMembers = users.filter((user) => user.id !== supervisor);
 
     const emails = users
       .map((user) => user.email)
@@ -102,8 +113,21 @@ export const CreateTeamByAdmin = async (
         (email): email is string => email !== null && email !== undefined,
       );
 
-    // await sendEmailWhenAdminCreateTeam(emails);
-
+    await sendEmailWhenAdminCreateTeam(
+      emails,
+      project,
+      teamMembers.map((member) => ({
+        name: member.username || "Unknown",
+        email: member.email || "No email",
+      })),
+      {
+        name: supervisorUser?.username || "Unknown",
+        email: supervisorUser?.email || "No email",
+      },
+      detail,
+      startAt,
+      endAt,
+    );
     return {
       success: "Successfully system will send an email to the team members.",
     };

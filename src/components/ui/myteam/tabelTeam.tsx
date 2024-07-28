@@ -13,15 +13,16 @@ import {
 import { useState } from "react";
 import { TeamFull } from "../../../types/modal";
 import DetalTabel from "./detalTabel";
+import { useCurrentLevel } from "../../../../hooks/use-curret-user";
 
 interface Team {
   teams: TeamFull[];
 }
 
 export default function TabelTeam({ teams }: Team) {
-  const [popupData, setPopupdata] = useState(null);
+  const [popupData, setPopupdata] = useState<TeamFull | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const handleOpen = (data: any) => {
+  const handleOpen = (data: TeamFull) => {
     setIsOpen(true);
     setPopupdata(data);
   };
@@ -39,47 +40,49 @@ export default function TabelTeam({ teams }: Team) {
     );
   }
   return (
-    <div className="h-full w-full">
-      <Table>
-        <TableCaption>A list of your team</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>no</TableHead>
-            <TableHead>Project</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead>Supervisor</TableHead>
-            <TableHead>Members</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {teams.map((data, i) => (
-            <TableRow
-              key={data.project}
-              onClick={() => handleOpen(data)}
-              className="hover:bg-violet-100"
-            >
-              <TableCell className="font-medium">{i}</TableCell>
-              <TableCell>{data.project}</TableCell>
-              <TableCell>{data.department}</TableCell>
-              <TableCell>
-                {format(new Date(data.startAt), "yyyy-MM-dd  HH:mm")}
-              </TableCell>
-              <TableCell>
-                {format(new Date(data.endAt), "yyyy-MM-dd HH:mm")}
-              </TableCell>
-              <TableCell>
-                {data.member.find((d) => d.isSupervisor)?.user?.username}
-              </TableCell>
-              <TableCell>{data.member.length}</TableCell>
+    <>
+      <div className="flex h-full w-full items-center justify-center">
+        <Table>
+          <TableCaption>A list of your team</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>no</TableHead>
+              <TableHead>Project</TableHead>
+              <TableHead>Department</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
+              <TableHead>Supervisor</TableHead>
+              <TableHead>Members</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {isOpen && (
-        <DetalTabel isOpen={isOpen} onClose={handleClose} teams={teams} />
-      )}
-    </div>
+          </TableHeader>
+          <TableBody>
+            {teams.map((data, i) => (
+              <TableRow
+                key={data.project}
+                onClick={() => handleOpen(data)}
+                className="hover:bg-violet-100"
+              >
+                <TableCell className="font-medium">{i}</TableCell>
+                <TableCell>{data.project}</TableCell>
+                <TableCell>{data.department}</TableCell>
+                <TableCell>
+                  {format(new Date(data.startAt), "yyyy-MM-dd  HH:mm")}
+                </TableCell>
+                <TableCell>
+                  {format(new Date(data.endAt), "yyyy-MM-dd HH:mm")}
+                </TableCell>
+                <TableCell>
+                  {data.member.find((d) => d.isSupervisor)?.user?.username}
+                </TableCell>
+                <TableCell>{data.member.length}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {isOpen && (
+          <DetalTabel isOpen={isOpen} onClose={handleClose} teams={popupData} />
+        )}
+      </div>
+    </>
   );
 }

@@ -18,7 +18,7 @@ export default function Sidebar_Body({ user }: Props) {
     setChecked(!checked);
   }
   return (
-    <div className="drawer">
+    <div className="drawer h-[100vh]">
       <input
         id="my-drawer"
         type="checkbox"
