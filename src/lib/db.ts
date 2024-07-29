@@ -1,13 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 
-// * ประกาศตัวแปร global ให้สามารถใช้งาน Prisma ได้ทั่วโปรเจ็ค
-declare global {
-  var prisma: PrismaClient | undefined;
-}
+const prismaClientSingleton = () => {
+  return new PrismaClient();
+};
 
-// * สร้าง Intsance
-export const db = globalThis.prisma || new PrismaClient();
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+} & typeof global;
 
-// * ในกรณีที่ไม่ได้อยู่ในโหมด production. การทำเช่นนี้ช่วยป้องกันการสร้างหลาย instances ของ PrismaClient ในระหว่างการพัฒนา ซึ่งจะช่วยลดการเชื่อมต่อฐานข้อมูลที่ไม่จำเป็น.
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
-if (process.env.NODE_ENV !== "production") globalThis.prisma = db;
+export default prisma;
+
+if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
+
+export const db = prisma;
