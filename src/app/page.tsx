@@ -14,12 +14,11 @@ export default function Home() {
     >
       <div className="h-full w-full">
         <Image
-          src="/test.gif"
+          src="/test2.gif"
           alt="Illustrative Image"
-          width={1000}
-          height={1000}
-          objectFit="cover"
-          className="rounded-lg shadow-lg"
+          width={1600}
+          height={1600}
+          className="h-full w-full rounded-lg shadow-lg"
         />
       </div>
     </Cardwarpper>
