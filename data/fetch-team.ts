@@ -1,12 +1,8 @@
 "use server";
-
-import { redirect } from "next/navigation";
-
+import { endOfDay, startOfDay } from "date-fns";
+import { auth } from "../auth";
 import { db } from "../src/lib/db";
 import { useCurrentLevel } from "../src/lib/auth";
-import { auth } from "../auth";
-import { getAttendance } from "./fetch-attendance";
-import { endOfDay, startOfDay } from "date-fns";
 
 export async function FetchTeam() {
   const currentUser = await auth();
@@ -27,6 +23,7 @@ export async function FetchTeam() {
           adminId: true,
           member: {
             select: {
+              id: true,
               isSupervisor: true,
               user: {
                 select: {
@@ -34,18 +31,18 @@ export async function FetchTeam() {
                   username: true,
                   role: true,
                   job: true,
-                  attendance: {
-                    where: {
-                      dateIn: {
-                        gte: startOfDay(today),
-                        lte: endOfDay(today),
-                      },
-                    },
-                    select: {
-                      dateIn: true,
-                      dateOut: true,
-                    },
+                },
+              },
+              attendance: {
+                where: {
+                  dateIn: {
+                    gte: startOfDay(today),
+                    lte: endOfDay(today),
                   },
+                },
+                select: {
+                  dateIn: true,
+                  dateOut: true,
                 },
               },
             },
@@ -76,6 +73,7 @@ export async function FetchTeam() {
           adminId: true,
           member: {
             select: {
+              id: true,
               isSupervisor: true,
               user: {
                 select: {
@@ -83,18 +81,18 @@ export async function FetchTeam() {
                   username: true,
                   role: true,
                   job: true,
-                  attendance: {
-                    where: {
-                      dateIn: {
-                        gte: startOfDay(today),
-                        lte: endOfDay(today),
-                      },
-                    },
-                    select: {
-                      dateIn: true,
-                      dateOut: true,
-                    },
+                },
+              },
+              attendance: {
+                where: {
+                  dateIn: {
+                    gte: startOfDay(today),
+                    lte: endOfDay(today),
                   },
+                },
+                select: {
+                  dateIn: true,
+                  dateOut: true,
                 },
               },
             },

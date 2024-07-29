@@ -15,7 +15,7 @@ import {
 import { db } from "../src/lib/db";
 import { Attendance, CreateAt, StatusTask } from "@prisma/client";
 import { auth } from "../auth";
-import { GetSupervisorById } from "../data/supervisor";
+import { GetAdminByTeamId, GetSupervisorById } from "../data/supervisor";
 import { sendMailWithCreateTask } from "../src/lib/sendMail_StartTask";
 import { getUserByEmail, getUserById } from "../data/user";
 import { GetTeamById } from "../data/team";
@@ -63,6 +63,13 @@ export const StartWorkAction = async (
   const today = new Date();
 
   // * หากยังไม่ลงชื่อ ให้ทำการลงชื่อเข้าทำงาน
+  const teamMember = await db.teamMember.findFirst({
+    where: { userId: userId },
+  });
+
+  if (!teamMember) {
+    return { error: "Team member not found" };
+  }
 
   const task = await db.task.create({
     data: {
@@ -73,24 +80,39 @@ export const StartWorkAction = async (
       endAt,
       createAt: createAt,
       status: StatusTask.pending,
-      userId: user?.user.id,
+      teamMemberId: teamMember.id,
+      dateCreateAt: new Date(),
     },
   });
 
   if (existingAttendence.length === 0) {
-    await createAttendence(userId, today); //* ใช้เวลาปัจจุบัน
+    await createAttendence(teamMember.id, today); //* ใช้เวลาปัจจุบัน
   }
   const supervisor = await GetSupervisorById(user?.user.id || "");
   const userData = await getUserById(user?.user.id || "");
   const team = await GetTeamById(user?.user.id || "");
+
+  // ตรวจสอบว่า `supervisor` เป็นคนสร้างงานเองหรือไม่
+  const isSupervisorCreatingTask = teamMember.isSupervisor;
+
+  let recipientEmail = "";
+
+  if (isSupervisorCreatingTask) {
+    // ส่งอีเมลไปที่ admin ของทีม
+    recipientEmail = team?.admin?.email || "";
+  } else {
+    // ส่งอีเมลไปที่ supervisor
+    recipientEmail = supervisor?.email || "";
+  }
+
   await sendMailWithCreateTask(
-    supervisor?.supervisor?.email || "",
+    recipientEmail,
     user?.user.username || "",
     userData?.first_name || "",
     userData?.last_name || "",
-    team?.team?.department || "",
-    supervisor?.supervisor?.username || "",
-    team?.team?.project || "",
+    team?.department || "",
+    supervisor?.username || "",
+    team?.project || "",
     task?.title || "",
     task?.status || "",
     startAt,
@@ -103,6 +125,6 @@ export const StartWorkAction = async (
   revalidatePath("/");
   return {
     success: ` 
-succeed ! The system will send an email to the supervisor. ${supervisor?.supervisor?.username}  `,
+success ! The system will send an email to ${isSupervisorCreatingTask ? "admin" : "supervisor"}.`,
   };
 };

@@ -2,19 +2,19 @@
 
 import { db } from "../src/lib/db";
 
-export async function getAttendance(userId: string) {
+export async function getAttendance(teamMemberId: string) {
   const data = await db.attendance.findMany({
     where: {
-      userId,
+      teamMemberId,
     },
   });
   return data;
 }
 
-export async function getAttendanceForSumery(userId: string) {
+export async function getAttendanceForSumery(teamMemberId: string) {
   const data = await db.attendance.findMany({
     where: {
-      userId,
+      teamMemberId,
     },
     select: {
       dateIn: true,
@@ -25,13 +25,16 @@ export async function getAttendanceForSumery(userId: string) {
   return data;
 }
 
-export async function getAttendanceByIdAndDate(userId: string, checkIn: Date) {
+export async function getAttendanceByIdAndDate(
+  teamMemberId: string,
+  checkIn: Date,
+) {
   const startOfDay = new Date(checkIn.setHours(0, 0, 0, 0));
   const endOfDay = new Date(checkIn.setHours(23, 59, 59, 999));
 
   const data = await db.attendance.findMany({
     where: {
-      userId,
+      teamMemberId,
       dateIn: {
         gte: startOfDay,
         lte: endOfDay,

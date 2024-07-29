@@ -6,7 +6,7 @@ export async function FetchTask(id: string) {
   const user = await getUserById(id);
   const data = await db.task.findFirst({
     where: {
-      userId: user?.id,
+      teamMemberId: user?.id,
     },
     orderBy: {
       createAt: "desc",
@@ -24,7 +24,7 @@ export async function FetchAllTask(id: string) {
   const user = await getUserById(id);
   const data = await db.task.findMany({
     where: {
-      userId: user?.id,
+      teamMemberId: user?.id,
     },
     orderBy: {
       createAt: "desc",
@@ -41,7 +41,7 @@ export async function FetchAllTaskForSumery(id: string) {
   const user = await getUserById(id);
   const data = await db.task.findMany({
     where: {
-      userId: user?.id,
+      teamMemberId: user?.id,
     },
     orderBy: {
       createAt: "desc",

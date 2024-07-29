@@ -11,5 +11,5 @@ export default async function Page() {
       </div>
     );
   }
-  return <TabelTeam teams={teams} />;
+  return <TabelTeam teams={teams!} />;
 }

@@ -172,7 +172,7 @@ export default function FormApprove({
                 )}
               />
             </div>
-            {session == "Supervisor" ? (
+            {session === "Supervisor" || session === "Admin" ? (
               <Button
                 disabled={isPending}
                 type="submit"

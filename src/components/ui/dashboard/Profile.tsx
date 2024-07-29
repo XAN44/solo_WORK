@@ -3,8 +3,13 @@ import React from "react";
 import { MdDashboardCustomize } from "react-icons/md";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { CgProfile } from "react-icons/cg";
 
-export default function Admin() {
+interface Model {
+  id: string;
+}
+
+export default function YourProfile({ id }: Model) {
   return (
     <motion.div
       whileHover={{
@@ -12,7 +17,7 @@ export default function Admin() {
       }}
     >
       <Link
-        href="/dashboard/admin"
+        href={`/dashboard/profile/${id}`}
         className="flex flex-col items-center justify-center"
       >
         <motion.div className="h-60 w-60 rounded-lg bg-black text-white">
@@ -25,8 +30,8 @@ export default function Admin() {
             }}
             className="flex h-full w-full flex-col items-center justify-center"
           >
-            Create Team
-            <MdDashboardCustomize size={100} />
+            Your Profile
+            <CgProfile size={100} />
           </motion.div>
         </motion.div>
       </Link>

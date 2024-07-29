@@ -34,6 +34,26 @@ export default function DetalTabel({ isOpen, onClose, teams }: Data) {
     onClose();
   };
 
+  // Helper function to get unique days from attendance records
+  const getUniqueDays = (
+    attendance: { dateIn?: Date | null; dateOut?: Date | null }[],
+  ) => {
+    const daysMap: {
+      [key: string]: { dateIn?: Date | null; dateOut?: Date | null };
+    } = {};
+
+    attendance.forEach((record) => {
+      if (record.dateIn) {
+        const dayKey = format(new Date(record.dateIn), "yyyy-MM-dd");
+        if (!daysMap[dayKey]) {
+          daysMap[dayKey] = { dateIn: record.dateIn, dateOut: record.dateOut };
+        }
+      }
+    });
+
+    return Object.values(daysMap);
+  };
+
   return (
     <div
       className="fixed inset-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50"
@@ -53,7 +73,7 @@ export default function DetalTabel({ isOpen, onClose, teams }: Data) {
               Team leader:
               {teams?.member.find((f) => f.isSupervisor)?.user?.username}
             </h1>
-            <h1>Project:{teams?.project}</h1>
+            <h1>Project: {teams?.project}</h1>
             <Table>
               <TableCaption>A list of your team</TableCaption>
               <TableHeader>
@@ -77,38 +97,33 @@ export default function DetalTabel({ isOpen, onClose, teams }: Data) {
                     <TableCell>{member.user?.username}</TableCell>
                     <TableCell>{member.user?.role}</TableCell>
                     <TableCell>{member.user?.job}</TableCell>
-                    <TableCell className="">
-                      {member.user?.attendance &&
-                      member.user.attendance.length > 0
-                        ? member.user.attendance.map((att, j) => (
+                    <TableCell>
+                      {member.attendance && member.attendance.length > 0
+                        ? getUniqueDays(member.attendance).map((att, j) => (
                             <div key={j}>
-                              {att.checkIn
-                                ? format(
-                                    new Date(att.checkIn),
-                                    "eeee 'at' h:mm",
-                                  )
+                              {att.dateIn
+                                ? format(new Date(att.dateIn), "eeee 'at' h:mm")
                                 : "No Time In"}
                             </div>
                           ))
                         : "No Time In"}
                     </TableCell>
                     <TableCell>
-                      {member.user?.attendance &&
-                      member.user.attendance.length > 0
-                        ? member.user.attendance.map((att, j) => (
+                      {member.attendance && member.attendance.length > 0
+                        ? getUniqueDays(member.attendance).map((att, j) => (
                             <div key={j}>
-                              {att.checkOut
+                              {att.dateOut
                                 ? format(
-                                    new Date(att.checkOut),
+                                    new Date(att.dateOut),
                                     "eeee 'at' h:mm",
                                   )
-                                : " No Time Out"}
+                                : "No Time Out"}
                             </div>
                           ))
                         : "No Time Out"}
                     </TableCell>
                     <TableCell>
-                      <ActionBtn id={member.user?.id || ""} />
+                      <ActionBtn id={member.id} />
                     </TableCell>
                   </TableRow>
                 ))}

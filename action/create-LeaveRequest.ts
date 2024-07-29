@@ -38,16 +38,25 @@ export const StartLeaveRequestAtion = async (
     return { error: "วันสิ้นสุดการลา ไม่ควรน้อยกว่าวันเริ่มลา" };
   }
   //   TODO : ตรวจสอบว่าได้ดำเนินการลาล่วงหน้าแล้วหรือยัง
-  // if (dayDifference <= 14) {
-  //   return { error: "Leave must be requested at least 15 days in advance" };
-  // }
+  if (dayDifference <= 14) {
+    return { error: "Leave must be requested at least 15 days in advance" };
+  }
   const leaveDuration =
     differenceInDays(new Date(dateOut), new Date(dateIn)) + 1; // รวมวันที่เริ่มต้นและวันสิ้นสุด
+
+  const teamMemberId = await db.teamMember.findFirst({
+    where: {
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
 
   const create = await db.attendance.create({
     data: {
       title,
-      userId,
+      teamMemberId: teamMemberId?.id,
       typeleave: typeLeave,
       reason,
       type: Attendance.Leave,
@@ -65,12 +74,12 @@ export const StartLeaveRequestAtion = async (
   await sendWithLeaveRequest(
     create.id,
     create.title || "",
-    supervisor?.supervisor?.email || "",
+    supervisor?.email || "",
     userData?.first_name || "",
     userData?.last_name || "",
     userData?.username || "",
-    team?.team?.department || "",
-    supervisor?.supervisor?.username || "",
+    team?.department || "",
+    supervisor?.username || "",
     typeLeave,
     tel,
     reason,
@@ -81,7 +90,7 @@ export const StartLeaveRequestAtion = async (
   );
 
   return {
-    success: `The system will send an email to the supervisor. ${supervisor?.supervisor?.username}  `,
+    success: `The system will send an email to the supervisor. ${supervisor?.username}  `,
     successId: create.id,
   };
 };

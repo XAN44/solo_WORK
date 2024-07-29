@@ -1,15 +1,9 @@
 "use client";
 import React, { startTransition, useState, useTransition } from "react";
-import { TeamFull } from "../../../types/modal";
+
 import { Popover, PopoverContent, PopoverTrigger } from "../popover";
 import { Button } from "../button";
-import { SiQuicklook } from "react-icons/si";
-import Link from "next/link";
-import { CgProfile } from "react-icons/cg";
-import { GrTasks } from "react-icons/gr";
-import { useCurrentLevel } from "../../../lib/auth";
-import { Label } from "../label";
-import { Input } from "../input";
+
 import { StatusTask, UserLevel } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -42,7 +36,8 @@ export default function ActionBtn_AllTask({ id }: Model) {
   const form = useForm<z.infer<typeof StatusWorkSchema>>({
     resolver: zodResolver(StatusWorkSchema),
     defaultValues: {
-      status: StatusTask.pending,
+      status: "InProgress",
+      id: id,
     },
   });
 

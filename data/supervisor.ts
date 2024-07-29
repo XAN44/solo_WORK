@@ -9,6 +9,7 @@ export async function GetSupervisorById(id: string) {
     select: {
       supervisor: {
         select: {
+          id: true,
           email: true,
           username: true,
         },
@@ -16,5 +17,47 @@ export async function GetSupervisorById(id: string) {
     },
   });
 
-  return data;
+  return data?.supervisor || null; // แน่ใจว่าเราส่งค่าที่มีอยู่
+}
+
+export async function GetSupervisorInTeamById(id: string) {
+  const supervisor = await db.user.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      teamMember: {
+        select: {
+          team: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return supervisor;
+}
+
+export async function GetAdminByTeamId(teamId: string) {
+  const team = await db.team.findUnique({
+    where: {
+      id: teamId,
+    },
+    select: {
+      admin: {
+        select: {
+          email: true,
+          username: true,
+        },
+      },
+    },
+  });
+
+  return team?.admin || null;
 }

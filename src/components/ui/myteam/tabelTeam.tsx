@@ -13,7 +13,6 @@ import {
 import { useState } from "react";
 import { TeamFull } from "../../../types/modal";
 import DetalTabel from "./detalTabel";
-import { useCurrentLevel } from "../../../../hooks/use-curret-user";
 
 interface Team {
   teams: TeamFull[];
@@ -66,10 +65,10 @@ export default function TabelTeam({ teams }: Team) {
                 <TableCell>{data.project}</TableCell>
                 <TableCell>{data.department}</TableCell>
                 <TableCell>
-                  {format(new Date(data.startAt), "yyyy-MM-dd  HH:mm")}
+                  {format(new Date(data.startAt || ""), "yyyy-MM-dd  HH:mm")}
                 </TableCell>
                 <TableCell>
-                  {format(new Date(data.endAt), "yyyy-MM-dd HH:mm")}
+                  {format(new Date(data.endAt || ""), "yyyy-MM-dd HH:mm")}
                 </TableCell>
                 <TableCell>
                   {data.member.find((d) => d.isSupervisor)?.user?.username}

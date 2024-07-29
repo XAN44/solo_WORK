@@ -1,15 +1,8 @@
 "use client";
 import React, { startTransition, useState, useTransition } from "react";
-import { TeamFull } from "../../../types/modal";
+
 import { Popover, PopoverContent, PopoverTrigger } from "../popover";
-import { Button } from "../button";
-import { SiQuicklook } from "react-icons/si";
-import Link from "next/link";
-import { CgProfile } from "react-icons/cg";
-import { GrTasks } from "react-icons/gr";
-import { useCurrentLevel } from "../../../lib/auth";
-import { Label } from "../label";
-import { Input } from "../input";
+
 import { StatusTask, UserLevel } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,20 +23,27 @@ import toast from "react-hot-toast";
 import { MdError } from "react-icons/md";
 import { GiConfirmed } from "react-icons/gi";
 import { ClipLoader } from "react-spinners";
+import { Button } from "../button";
 
-export default function ActionBtn_AllTask() {
+interface Model {
+  id: string;
+}
+
+export default function ActionBtn_AllTask({ id }: Model) {
   const [buttonText, setButtonText] = useState("Submit");
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof StatusWorkSchema>>({
     resolver: zodResolver(StatusWorkSchema),
     defaultValues: {
-      status: StatusTask.pending,
+      status: "InProgress",
+      id: id,
     },
   });
 
   const onSubmit = (value: z.infer<typeof StatusWorkSchema>) => {
     startTransition(() => {
+      console.log(value);
       UpdateStatusTask(value).then((data) => {
         const isError = !!data?.error;
         toast.custom(
@@ -81,7 +81,7 @@ export default function ActionBtn_AllTask() {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger>
         <Button variant="outline">Open</Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">

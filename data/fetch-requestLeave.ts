@@ -17,15 +17,20 @@ export async function FetchRequestLeave(id: string) {
         dateIn: true,
         dateOut: true,
         statusLeave: true,
-        user: {
+        teamMember: {
           select: {
-            username: true,
-            first_name: true,
-            last_name: true,
+            user: {
+              select: {
+                username: true,
+                first_name: true,
+                last_name: true,
+              },
+            },
           },
         },
       },
     });
+    console.log(data);
     return data;
   } catch (error) {
     return null;

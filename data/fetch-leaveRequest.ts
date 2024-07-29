@@ -9,7 +9,7 @@ export async function getLeaveRequestByDate(userId: string, checkDate: Date) {
   const endOfDayDate = endOfDay(checkDate);
   const leaveRequest = await db.attendance.findMany({
     where: {
-      userId: userId,
+      teamMemberId: userId,
 
       type: Attendance.Leave,
     },

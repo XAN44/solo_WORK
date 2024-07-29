@@ -4,7 +4,7 @@ import { Attendance } from "@prisma/client";
 import { db } from "../src/lib/db";
 import { setHours, setMilliseconds, setMinutes, setSeconds } from "date-fns";
 
-export async function createAttendence(userId: string, dateIn: Date) {
+export async function createAttendence(teamMemberId: string, dateIn: Date) {
   // TODO : ลงชือเป็นช่วงเวลาล่าสุด
 
   const today = new Date();
@@ -18,7 +18,7 @@ export async function createAttendence(userId: string, dateIn: Date) {
 
   const data = await db.attendance.create({
     data: {
-      userId,
+      teamMemberId,
       dateIn,
       type,
     },

@@ -39,7 +39,7 @@ export const sendMailWithCreateTask = async (
 
   // แปลค่า createAt เป็นข้อความ
   const createAtDescription =
-    createAt === CreateAt.PAST ? "งานย้อนหลัง" : "งานปกติ";
+    createAt === CreateAt.Backdate ? "งานย้อนหลัง" : "งานปกติ";
 
   const mailOptions = {
     from: process.env.EMAIL,

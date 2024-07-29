@@ -30,12 +30,16 @@ export async function ApproveLeaveRequest(
         id,
       },
       select: {
-        user: {
+        teamMember: {
           select: {
-            first_name: true,
-            last_name: true,
-            email: true,
-            username: true,
+            user: {
+              select: {
+                first_name: true,
+                last_name: true,
+                email: true,
+                username: true,
+              },
+            },
           },
         },
       },
@@ -43,10 +47,10 @@ export async function ApproveLeaveRequest(
 
     await sendWithApproveRequest(
       id,
-      fetchUser?.user.email || "",
-      fetchUser?.user.first_name || "",
+      fetchUser?.teamMember?.user?.email || "",
+      fetchUser?.teamMember?.user?.first_name || "",
       data.title || "",
-      fetchUser?.user.last_name || "",
+      fetchUser?.teamMember?.user?.last_name || "",
       statusLeave,
     );
     revalidatePath("/");
