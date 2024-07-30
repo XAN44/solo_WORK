@@ -26,7 +26,7 @@ export default function Attendence() {
             }}
             className="flex h-full w-full flex-col items-center justify-center"
           >
-            Attendence
+            Team
             <RiTeamFill size={100} />
           </motion.div>
         </motion.div>

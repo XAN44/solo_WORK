@@ -101,6 +101,7 @@ export async function FetchTeam() {
       });
       return team;
     }
+    return null;
   } catch (error) {
     return null;
   }

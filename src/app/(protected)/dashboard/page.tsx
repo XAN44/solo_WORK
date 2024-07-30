@@ -13,11 +13,11 @@ import ConfigSalary from "../../../components/ui/dashboard/configSalary";
 import CheckAbset from "../../../components/ui/dashboard/checkAbset";
 import JoinTeam from "../../../components/ui/dashboard/joinTeam";
 import { FetchTeam } from "../../../../data/fetchTeam-CLoseJoin";
+import { GetTeamById } from "../../../../data/team";
 
 async function Page() {
   const user = await currentUser();
   const data = await getProfileTeamById(user?.id || "");
-
   const userTeamMembership = await FetchTeam();
 
   return (
@@ -26,9 +26,12 @@ async function Page() {
         <LevelGate allowedLevel={UserLevel.Admin}>
           <Admin />
         </LevelGate>
-        <Attendence />
-
-        <YourProfile id={data?.id || ""} />
+        {userTeamMembership ? <Attendence /> : null}
+        {data?.id ? (
+          <>
+            <YourProfile id={data?.id || ""} />
+          </>
+        ) : null}
 
         <LevelGate allowedLevel={UserLevel.Admin}>
           <ConfigSalary />
