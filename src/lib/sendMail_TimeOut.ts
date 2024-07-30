@@ -41,7 +41,7 @@ export const sendMailWithTimeOut = async (
       (task) =>
         `<p>งาน: <strong>${task.title}</strong>, สถานะ: <strong>${task.status}</strong></p>`,
     )
-    .join("<br>");
+    .join("");
 
   const mailOptions = {
     from: process.env.EMAIL,
