@@ -14,8 +14,8 @@ export default async function Protect_Layout({
 }) {
   const user = await currentUser();
   return (
-    <section className={inter.className}>
-      <Sidebar user={user!}>{children}</Sidebar>
-    </section>
+    <Sidebar user={user!}>
+      <section className={inter.className}>{children}</section>
+    </Sidebar>
   );
 }

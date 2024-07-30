@@ -13,7 +13,7 @@ import {
 import { useState } from "react";
 import { TeamFull } from "../../../types/modal";
 import DetalTabel from "./detalTabel";
-
+import { motion, AnimatePresence } from "framer-motion";
 interface Team {
   teams: TeamFull[];
 }
@@ -39,8 +39,13 @@ export default function TabelTeam({ teams }: Team) {
     );
   }
   return (
-    <>
-      <div className="flex h-full w-full items-center justify-center">
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, scale: 1 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 1 }}
+        className="flex h-full w-full items-center justify-center"
+      >
         <Table>
           <TableCaption>A list of your team</TableCaption>
           <TableHeader>
@@ -81,7 +86,7 @@ export default function TabelTeam({ teams }: Team) {
         {isOpen && (
           <DetalTabel isOpen={isOpen} onClose={handleClose} teams={popupData} />
         )}
-      </div>
-    </>
+      </motion.div>
+    </AnimatePresence>
   );
 }
