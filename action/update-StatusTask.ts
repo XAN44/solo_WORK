@@ -10,113 +10,155 @@ import { StatusTask } from "@prisma/client";
 export async function UpdateStatusTask(
   value: z.infer<typeof StatusWorkSchema>,
 ) {
-  const validateField = StatusWorkSchema.safeParse(value);
-  const user = await auth();
-  const userId = user?.user.id || "";
+  try {
+    const validateField = StatusWorkSchema.safeParse(value);
+    const user = await auth();
+    const userId = user?.user.id || "";
 
-  if (!validateField.success) {
-    return { error: "Error: Invalid input" };
-  }
-
-  const { id, status } = validateField.data;
-
-  // ดึงข้อมูล task เพื่อเช็คทีมที่เกี่ยวข้องและผู้สร้าง task
-  const task = await db.task.findUnique({
-    where: {
-      id,
-    },
-    select: {
-      typeOfWork: true,
-      teamMemberId: true,
-      teamMember: {
-        select: {
-          userId: true,
-          team: {
-            select: {
-              id: true,
-            },
-          },
-        },
-      },
-      status: true, // เพิ่มการดึงสถานะปัจจุบันของงาน
-    },
-  });
-
-  if (!task) {
-    return { error: "Task not found" };
-  }
-
-  const isAdmin = user?.user.level === "Admin"; // ตรวจสอบสถานะของ Admin จากข้อมูล user
-
-  // ตรวจสอบว่างานนั้นเคยถูกอัพเดทเป็น Completed หรือไม่
-  if (task.status === StatusTask.Completed) {
-    return {
-      error:
-        "Task has already been marked as Completed and cannot be updated again.",
-    };
-  }
-
-  if (status === StatusTask.Completed) {
-    const settings = await db.accumulationSettings.findFirst({
-      where: {
-        typeOfWork: task.typeOfWork,
-      },
-    });
-
-    if (!settings) {
-      return { error: "No salary settings found for this type of work" };
+    if (!validateField.success) {
+      return { error: "Error: Invalid input" };
     }
 
-    // ตรวจสอบว่า teamMemberId ไม่เป็น null หรือ undefined
-    if (task.teamMemberId) {
-      // ใช้ upsert เพื่อเพิ่มหรืออัพเดตข้อมูลใน accumulated_amounts
-      await db.accumulatedAmount.upsert({
-        where: {
-          id: task.teamMemberId,
-        },
-        update: {
-          amount: {
-            increment: settings.amount,
-          },
-        },
-        create: {
-          teamMemberId: task.teamMemberId || "",
-          amount: settings.amount,
-        },
-      });
-    }
-  }
+    const { id, status } = validateField.data;
 
-  if (!isAdmin) {
     // ตรวจสอบว่า user เป็น supervisor หรือไม่
     const supervisor = await GetSupervisorInTeamById(userId);
-    if (!supervisor) {
-      return { error: "You are not a supervisor" };
-    }
+    // ประกาศตัวแปรรับค่าแอดมิน
+    const isAdmin = user?.user.level === "Admin";
 
-    // ตรวจสอบว่าทีมของ task ตรงกับทีมของ supervisor หรือไม่
-    const supervisorTeamIds = supervisor.teamMember.map((tm) => tm.team?.id);
-    if (!supervisorTeamIds.includes(task.teamMember?.team?.id)) {
+    if (!supervisor && !isAdmin) {
       return { error: "You are not authorized to update this task" };
     }
 
-    // ตรวจสอบว่า task ถูกสร้างโดย supervisor เองหรือไม่
-    const isTaskCreatedBySupervisor = task.teamMember?.userId === userId;
-    if (isTaskCreatedBySupervisor) {
-      return { error: "Supervisors cannot approve their own tasks." };
+    // ดึงข้อมูล task เพื่อเช็คทีมที่เกี่ยวข้องและผู้สร้าง task
+    const task = await db.task.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        typeOfWork: true,
+        teamMemberId: true,
+        teamMember: {
+          select: {
+            userId: true,
+            team: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+        status: true, // เพิ่มการดึงสถานะปัจจุบันของงาน
+      },
+    });
+
+    if (!task) {
+      return { error: "Task not found" };
     }
+
+    // ตรวจสอบว่าสถานะของงานไม่สามารถเปลี่ยนแปลงได้ถ้าสถานะปัจจุบันเป็น Completed หรือ Cancelled
+    if (
+      task.status === StatusTask.Completed ||
+      task.status === StatusTask.Cancelled
+    ) {
+      return {
+        error:
+          "Cannot change status as the task is already completed or cancelled",
+      };
+    }
+
+    if (status === StatusTask.Completed || status === StatusTask.Cancelled) {
+      if (!isAdmin) {
+        return { error: `Only Admin can update to ${status} status` };
+      }
+
+      // TODO หาค่าของเงินที่แอดมินได้ตั้งค่าไว้ว่างานประเภทนั้นๆ จะได้รับเงินเท่าไหร่ต่องาน
+      const settings = await db.accumulationSettings.findFirst({
+        where: {
+          typeOfWork: task.typeOfWork,
+        },
+      });
+
+      if (!settings) {
+        return { error: "No salary settings found for this type of work" };
+      }
+
+      if (task.teamMemberId) {
+        if (status === StatusTask.Completed) {
+          // ค้นหาข้อมูลที่มี teamMemberId ตรงกัน
+          const existingAmount = await db.accumulatedAmount.findFirst({
+            where: {
+              teamMemberId: task.teamMemberId,
+            },
+          });
+
+          if (existingAmount) {
+            // อัปเดตข้อมูลที่มีอยู่
+            await db.accumulatedAmount.update({
+              where: {
+                id: existingAmount.id, // ใช้ id ของข้อมูลที่ค้นพบ
+              },
+              data: {
+                amount: {
+                  increment: settings.amount,
+                },
+              },
+            });
+          } else {
+            // สร้างข้อมูลใหม่ถ้าไม่พบข้อมูลที่ตรงกัน
+            await db.accumulatedAmount.create({
+              data: {
+                teamMemberId: task.teamMemberId,
+                amount: settings.amount,
+              },
+            });
+          }
+        } else if (status === StatusTask.Cancelled) {
+          // ค้นหาข้อมูลที่มี teamMemberId ตรงกัน
+          const existingAmount = await db.accumulatedAmount.findFirst({
+            where: {
+              teamMemberId: task.teamMemberId,
+            },
+          });
+
+          if (existingAmount) {
+            // อัปเดตข้อมูลที่มีอยู่
+            await db.accumulatedAmount.update({
+              where: {
+                id: existingAmount.id, // ใช้ id ของข้อมูลที่ค้นพบ
+              },
+              data: {
+                amount: {
+                  decrement: settings.amount,
+                },
+              },
+            });
+          } else {
+            // สร้างข้อมูลใหม่ถ้าไม่พบข้อมูลที่ตรงกัน
+            await db.accumulatedAmount.create({
+              data: {
+                teamMemberId: task.teamMemberId,
+                amount: -settings.amount,
+              },
+            });
+          }
+        }
+      }
+    }
+
+    // อัพเดทสถานะของ task
+    await db.task.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+    });
+
+    revalidatePath("/");
+    return { success: "Success" };
+  } catch (error) {
+    return { error: "An unexpected error occurred" };
   }
-
-  // อัพเดทสถานะของ task
-  await db.task.update({
-    where: {
-      id,
-    },
-    data: {
-      status,
-    },
-  });
-
-  revalidatePath("/");
-  return { success: "Success" };
 }

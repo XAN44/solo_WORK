@@ -19,7 +19,7 @@ export async function createAttendence(teamMemberId: string, dateIn: Date) {
   );
   const type = dateIn > nineAm ? Attendance.Late : Attendance.Present;
 
-  const data = await db.attendance.create({
+  await db.attendance.create({
     data: {
       teamMemberId,
       dateIn,

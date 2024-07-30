@@ -19,7 +19,6 @@ export const sendWithLeaveRequest = async (
   last: string,
   username: string,
   department: string,
-  supervisor: string,
   typeleave: string,
   tel: string,
   reason: string,
@@ -47,8 +46,7 @@ export const sendWithLeaveRequest = async (
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #d1d5db; border-radius: 8px; background-color: #f9fafb;">
         <h2 style="font-size: 24px; color: #1f2937; margin-bottom: 10px;">Member Create Task Notification</h2>
         <p style="color: #4b5563; margin-bottom: 15px;">
-          เรียนคุณ <strong>${supervisor}</strong> ที่เคารพ,<br/><br/>
-          ผมนาย <strong>${name}</strong> นามสกุล <strong>${last}</strong><br/>
+           หมายเหตุจาก <strong>${name}</strong> นามสกุล <strong>${last}</strong><br/>
           แผนก <strong>${department}</strong><br/><br/>
           ได้ทำการขออนุญาติลางานเนื่องด้วยเหตุผล <strong>${reason}</strong>   
         </p>

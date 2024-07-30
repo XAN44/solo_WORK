@@ -142,17 +142,18 @@ enum StatusTask {
 }
 
 model task {
-  id           String      @id @default(cuid())
-  title        String
-  description  String
-  startAt      DateTime
-  endAt        DateTime
-  createAt     CreateAt
-  typeOfWork   typeOfWork
-  status       StatusTask
-  dateCreateAt DateTime
-  teamMember   teamMember? @relation(fields: [teamMemberId], references: [id])
-  teamMemberId String?
+  id                String              @id @default(cuid())
+  title             String
+  description       String
+  startAt           DateTime
+  endAt             DateTime
+  createAt          CreateAt
+  typeOfWork        typeOfWork
+  status            StatusTask
+  dateCreateAt      DateTime
+  teamMember        teamMember?         @relation(fields: [teamMemberId], references: [id])
+  teamMemberId      String?
+  AccumulatedAmount AccumulatedAmount[]
 }
 
 model AccumulationSettings {
@@ -169,8 +170,10 @@ model AccumulatedAmount {
   teamMemberId String
   amount       Float    @default(0.0)
   createdAt    DateTime @default(now())
+  taskId       String?
 
   teamMember teamMember @relation(fields: [teamMemberId], references: [id])
+  task       task?      @relation(fields: [taskId], references: [id], onDelete: Cascade) // ใช้ onDelete: Cascade ที่นี่
 
   @@map("accumulated_amounts")
 }

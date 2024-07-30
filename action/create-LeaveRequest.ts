@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { StartLeaveRequest } from "../schema/validateLeaveRequest";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, startOfDay } from "date-fns";
 import { db } from "../src/lib/db";
 import { auth } from "../auth";
 import { ApprovalStatus, Attendance, TypeLeave } from "@prisma/client";
@@ -28,21 +28,30 @@ export const StartLeaveRequestAtion = async (
 
   const { title, reason, dateIn, dateOut, tel, typeLeave } = validate.data;
 
-  const now = new Date();
+  const now = startOfDay(new Date());
+  const dateInDate = startOfDay(new Date(dateIn));
+  const dateOutDate = startOfDay(new Date(dateOut));
 
-  // TODO : ควบคุมการลา โดยต้องลาล่วงหน้า 15 วัน
-  const dayDifference = differenceInDays(new Date(dateIn), now);
-
-  //   TODO : วันสิ้นสุดการลา ไม่ควรน้อยกว่าวันที่เริ่มลา
-  if (new Date(dateOut) < new Date(dateIn)) {
-    return { error: "วันสิ้นสุดการลา ไม่ควรน้อยกว่าวันเริ่มลา" };
+  // ตรวจสอบวันสิ้นสุดการลาไม่ควรน้อยกว่าวันที่เริ่มลา
+  if (dateOutDate < dateInDate) {
+    return {
+      error:
+        "The end date of the leave should not be less than the date the leave begins",
+    };
   }
-  //   TODO : ตรวจสอบว่าได้ดำเนินการลาล่วงหน้าแล้วหรือยัง
-  if (dayDifference <= 14) {
-    return { error: "Leave must be requested at least 15 days in advance" };
+
+  // ตรวจสอบระยะเวลาในการลาล่วงหน้า
+  const dayDifference = differenceInDays(dateInDate, now);
+
+  if (dayDifference < 15) {
+    const daysRemaining = 15 - dayDifference;
+    return {
+      error: `Leave must be requested at least 15 days in advance. You need to request leave ${daysRemaining} day(s) earlier.`,
+    };
   }
   const leaveDuration =
-    differenceInDays(new Date(dateOut), new Date(dateIn)) + 1; // รวมวันที่เริ่มต้นและวันสิ้นสุด
+    differenceInDays(new Date(dateOut), new Date(dateIn)) + 1;
+  // รวมวันที่เริ่มต้นและวันสิ้นสุด
 
   const teamMemberId = await db.teamMember.findFirst({
     where: {
@@ -67,19 +76,18 @@ export const StartLeaveRequestAtion = async (
     },
   });
 
-  const supervisor = await GetSupervisorById(user?.user.id || "");
   const userData = await getUserById(user?.user.id || "");
   const team = await GetTeamById(user?.user.id || "");
+  const admin = team?.admin?.email || "";
 
   await sendWithLeaveRequest(
     create.id,
     create.title || "",
-    supervisor?.email || "",
+    admin,
     userData?.first_name || "",
     userData?.last_name || "",
     userData?.username || "",
     team?.department || "",
-    supervisor?.username || "",
     typeLeave,
     tel,
     reason,
@@ -90,7 +98,6 @@ export const StartLeaveRequestAtion = async (
   );
 
   return {
-    success: `The system will send an email to the supervisor. ${supervisor?.username}  `,
-    successId: create.id,
+    success: `The system will send an email to the admin  `,
   };
 };

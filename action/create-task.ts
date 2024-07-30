@@ -8,6 +8,7 @@ import {
   getHours,
   isAfter,
   isBefore,
+  isToday,
   setHours,
   setMinutes,
   startOfDay,
@@ -54,6 +55,10 @@ export const StartWorkAction = async (
     return {
       error: "Make sure you fill in information about the date correctly",
     };
+  }
+
+  if (isAfter(startAtDate, now)) {
+    return { error: "You cannot create tasks for future dates" };
   }
 
   // TODO ใช้สำหรับการเช็คเวลาลงชื่อ
@@ -106,7 +111,6 @@ export const StartWorkAction = async (
   // * หากยังไม่ลงชื่อ ให้ทำการลงชื่อเข้าทำงาน
   if (existingAttendence.length === 0) {
     await createAttendence(teamMember.id, today); //* ใช้เวลาปัจจุบัน
-    console.log(teamMember.id, "TEAMMMMMMMMM");
   }
 
   revalidatePath("/");
