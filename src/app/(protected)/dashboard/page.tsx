@@ -26,9 +26,9 @@ async function Page() {
           <Admin />
         </LevelGate>
         <Attendence />
-        <LevelGate allowedLevel={UserLevel.Supervisor || UserLevel.General}>
-          <YourProfile id={data?.id || ""} />
-        </LevelGate>
+
+        <YourProfile id={data?.id || ""} />
+
         <LevelGate allowedLevel={UserLevel.Admin}>
           <ConfigSalary />
         </LevelGate>

@@ -47,6 +47,7 @@ export const getUserById = async (id: string) => {
         job: true,
         role: true,
         level: true,
+        department: true,
       },
     });
 
@@ -60,7 +61,7 @@ export const getMemberById = async (id: string) => {
   // TODO : ดึงข้อมูลผู้ใช้ด้วย ID
 
   try {
-    const user = await db.teamMember.findUnique({
+    const user = await db.teamMember.findFirst({
       where: { id },
       select: {
         id: true,

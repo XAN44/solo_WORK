@@ -35,7 +35,16 @@ export default function ActionBtn({ id }: Model) {
             className="text-blue-600 hover:underline"
           >
             <div className="flex items-center justify-center space-x-2">
-              <h1>View summary</h1>
+              <h1>All Task</h1>
+              <GrTasks />
+            </div>
+          </Link>
+          <Link
+            href={`/dashboard/profile/${id}/alltask`}
+            className="text-blue-600 hover:underline"
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <h1>All Attendance</h1>
               <GrTasks />
             </div>
           </Link>

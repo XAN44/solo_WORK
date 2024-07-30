@@ -73,39 +73,43 @@ export async function UpdateStatusTask(
       };
     }
 
-    if (!isAdmin) {
-      // Supervisor ไม่สามารถอัพเดตสถานะเป็น Completed ได้โดยตรงถ้าตนเองสร้างงาน
-      if (isTaskCreatedBySupervisor) {
-        return { error: "Supervisors cannot approve their own tasks." };
-      }
-      const settings = await db.accumulationSettings.findFirst({
+    // สมาชิกในทีมไม่สามารถอัพเดตสถานะเป็น Completed ได้
+    if (!isAdmin && supervisor.teamMember.some((tm) => tm.userId === userId)) {
+      return { error: "Team members cannot mark tasks as Completed." };
+    }
+
+    // Supervisor ไม่สามารถอัพเดตสถานะเป็น Completed ได้โดยตรงถ้าตนเองสร้างงาน
+    if (!isAdmin && isTaskCreatedBySupervisor) {
+      return { error: "Supervisors cannot approve their own tasks." };
+    }
+
+    const settings = await db.accumulationSettings.findFirst({
+      where: {
+        typeOfWork: task.typeOfWork,
+      },
+    });
+
+    if (!settings) {
+      return { error: "No salary settings found for this type of work" };
+    }
+
+    // ตรวจสอบว่า teamMemberId ไม่เป็น null หรือ undefined
+    if (task.teamMemberId) {
+      // ใช้ upsert เพื่อเพิ่มหรืออัพเดตข้อมูลใน accumulated_amounts
+      await db.accumulatedAmount.upsert({
         where: {
-          typeOfWork: task.typeOfWork,
+          id: task.teamMemberId,
+        },
+        update: {
+          amount: {
+            increment: settings.amount,
+          },
+        },
+        create: {
+          teamMemberId: task.teamMemberId || "",
+          amount: settings.amount,
         },
       });
-
-      if (!settings) {
-        return { error: "No salary settings found for this type of work" };
-      }
-
-      // ตรวจสอบว่า teamMemberId ไม่เป็น null หรือ undefined
-      if (task.teamMemberId) {
-        // ใช้ upsert เพื่อเพิ่มหรืออัพเดตข้อมูลใน accumulated_amounts
-        await db.accumulatedAmount.upsert({
-          where: {
-            id: task.teamMemberId,
-          },
-          update: {
-            amount: {
-              increment: settings.amount,
-            },
-          },
-          create: {
-            teamMemberId: task.teamMemberId || "",
-            amount: settings.amount,
-          },
-        });
-      }
     }
   }
 

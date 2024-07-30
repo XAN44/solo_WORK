@@ -25,11 +25,7 @@ export const exportTasksToExcel = (tasksData: any[]) => {
         ? format(new Date(task.endAt), "dd MMM yyyy HH:mm a", { locale: enUS })
         : "N/A",
       Status: task.status,
-      "Task Type": task.createAt
-        ? format(new Date(task.createAt), "dd MMM yyyy HH:mm a", {
-            locale: enUS,
-          })
-        : "N/A",
+      "Task Type": task.createAt,
     })),
   );
 

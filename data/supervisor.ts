@@ -31,6 +31,7 @@ export async function GetSupervisorInTeamById(id: string) {
       email: true,
       teamMember: {
         select: {
+          userId: true,
           team: {
             select: {
               id: true,

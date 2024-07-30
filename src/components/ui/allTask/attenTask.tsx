@@ -58,7 +58,7 @@ export default function AttenSumary({ data }: Props) {
                   {attendance.dateIn
                     ? format(
                         new Date(attendance.dateIn),
-                        "dd MMM yyyy HH:mm a",
+                        "dd MMM yyyy  HH:mm a ",
                         { locale: enUS },
                       )
                     : "N/A"}
