@@ -67,6 +67,25 @@ export const StartWorkAction = async (
     return { error: "Team member not found" };
   }
 
+  const existingTask = await db.task.findFirst({
+    where: {
+      teamMemberId: teamMember.id,
+      startAt: startAt,
+    },
+  });
+
+  if (existingTask) {
+    if (createAt === CreateAt.Normal) {
+      return {
+        error: "You can only create one task per day for the current day",
+      };
+    } else {
+      return {
+        error: "You can only create one task per day for backdated tasks",
+      };
+    }
+  }
+
   // TODO ตรวจสอบว่ามีการลงชื้อแล้วหรือไม่
   const existingAttendence = await getAttendanceByIdAndDate(teamMember.id, now);
 
