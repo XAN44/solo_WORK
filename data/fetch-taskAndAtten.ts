@@ -56,7 +56,6 @@ export async function FetchAllTask(teamMemberId: string) {
       },
     },
   });
-  console.log(teamMemberId);
 
   return tasks;
 }

@@ -69,18 +69,15 @@ export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
     return { error: "Not authorized to check out this record" };
   }
 
-  // Check if user already checked out today
   if (attendance.dateOut) {
     return { error: "You have already checked out today" };
   }
 
-  // Update the attendance record with the check-out time
   await db.attendance.update({
     where: { id },
     data: { dateOut },
   });
 
-  // Find the supervisor from the team members
   const supervisor = attendance.teamMember?.team?.member.find(
     (member) => member.isSupervisor,
   )?.user;

@@ -17,6 +17,7 @@ import { FetchTeam } from "../../../../data/fetchTeam-CLoseJoin";
 async function Page() {
   const user = await currentUser();
   const data = await getProfileTeamById(user?.id || "");
+
   const userTeamMembership = await FetchTeam();
 
   return (

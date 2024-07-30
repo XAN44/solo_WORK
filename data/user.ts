@@ -99,6 +99,8 @@ export const getProfileTeamById = async (userId: string) => {
       },
     });
 
+    console.log(user);
+
     return user;
   } catch (error) {
     return null;
