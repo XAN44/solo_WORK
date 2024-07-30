@@ -68,7 +68,7 @@ export async function FetchAllAtten(id: string) {
       },
     },
     orderBy: {
-      createAt: "asc",
+      dateIn: "asc",
     },
     select: {
       id: true,

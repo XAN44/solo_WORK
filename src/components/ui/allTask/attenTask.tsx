@@ -27,6 +27,14 @@ type Props = {
 };
 
 export default function AttenSumary({ data }: Props) {
+  // ตรวจสอบให้แน่ใจว่าข้อมูลถูกจัดเรียงตาม dateIn ก่อนที่จะแสดงผล
+  const sortedData = [...data].sort((a, b) => {
+    if (a.dateIn && b.dateIn) {
+      return new Date(a.dateIn).getTime() - new Date(b.dateIn).getTime();
+    }
+    return 0;
+  });
+
   return (
     <div className="h-full w-full">
       <h1 className="text-xl font-bold">Summary of Attendance</h1>
@@ -51,7 +59,7 @@ export default function AttenSumary({ data }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((attendance, index) => (
+            {sortedData.map((attendance, index) => (
               <TableRow key={attendance.id}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
