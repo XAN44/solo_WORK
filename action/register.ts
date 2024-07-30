@@ -42,14 +42,14 @@ export async function Register_Action(value: z.infer<typeof SignUpSchema>) {
     return { error: "username already in use!" };
   }
 
-  // const userLevel = email.endsWith("@vannesplus.com") ? "Admin" : level;
+  const userLevel = email.endsWith("@vannesplus.com") ? "Admin" : level;
 
-  // if (!email.endsWith("@vannesplus.com") && level === "Admin") {
-  //   return {
-  //     error:
-  //       "You do not have permission to register an account with this privilege",
-  //   };
-  // }
+  if (!email.endsWith("@vannesplus.com") && level === "Admin") {
+    return {
+      error:
+        "You do not have permission to register an account with this privilege",
+    };
+  }
 
   await db.user.create({
     data: {
