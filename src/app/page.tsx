@@ -4,10 +4,10 @@ import Cardwarpper from "../components/ui/cardwarpper/cardwarpper";
 export default function Home() {
   return (
     <Cardwarpper
-      bar_content="Welcome to the Employee Management System"
-      bar_title="Sign-In"
-      bar_sub="Create an account "
-      href="/auth/sign-up"
+      bar_content="I'm just kidding. Please get some rest"
+      bar_title="Work Now!"
+      bar_sub="back to dashboard"
+      href="/dashboard"
       color=""
       bg2=" bg-white"
       bg1="bg-gradient-to-b from-violet-600 to-indigo-600"
@@ -18,7 +18,7 @@ export default function Home() {
           alt="Illustrative Image"
           width={1600}
           height={1600}
-          className="h-full w-full rounded-lg shadow-lg"
+          className="h-full w-full shadow-lg"
         />
       </div>
     </Cardwarpper>
