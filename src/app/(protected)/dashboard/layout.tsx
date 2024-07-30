@@ -6,6 +6,7 @@ const inter = Roboto_Mono({
   weight: "variable",
   subsets: ["vietnamese"],
 });
+export const maxDuration = 20;
 
 export default async function Protect_Layout({
   children,
@@ -15,7 +16,7 @@ export default async function Protect_Layout({
   const user = await currentUser();
   return (
     <Sidebar user={user!}>
-      <section className={inter.className}>{children}</section>
+      <div className={inter.className}>{children}</div>
     </Sidebar>
   );
 }

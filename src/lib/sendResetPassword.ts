@@ -13,7 +13,7 @@ export const sendPasswordResetEmail = async (
   token: string,
   userName: string,
 ) => {
-  const resetLink = `${process.env.NEXT_PUBLIC_API_URL}auth/new-password?token=${token}`;
+  const resetLink = `${process.env.NEXT_PUBLIC_API_URL}/auth/new-password?token=${token}`;
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,

@@ -41,7 +41,7 @@ export default function Sidebar_Body({ user }: Props) {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <ul className="menu relative min-h-full w-80 items-center justify-between bg-gradient-to-b from-violet-600 to-indigo-600 p-4 text-base-content">
+        <ul className="menu relative min-h-full w-80 items-center justify-between bg-gradient-to-r from-slate-900 to-slate-700 p-4 text-base-content">
           <button
             className="absolute right-0 top-2 pr-3 font-black text-black"
             onClick={handleClick}

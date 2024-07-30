@@ -7,7 +7,10 @@ import toast, { Toaster } from "react-hot-toast";
 import clsx from "clsx";
 import Head from "next/head";
 import { markAbsentUsers } from "../../action/autoAbsent";
+import { Suspense } from "react";
+import Loading from "./loading";
 
+export const maxDuration = 20;
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -28,10 +31,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <SessionProvider session={session}>
-        <body className={inter.className}>
-          <main className="">{children}</main>
-          <Toaster />
-        </body>
+        <Suspense fallback={<Loading />}>
+          <body className={inter.className}>
+            <main className="h-[100vh]">{children}</main>
+            <Toaster />
+          </body>
+        </Suspense>
       </SessionProvider>
     </html>
   );
