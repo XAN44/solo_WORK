@@ -35,7 +35,7 @@ export async function createAttendenceBackDated(
 
   // TODO ถ้าลงชื่อเป็นเวลาก่อนหน้าวันนี้ จะเท่ากับลงชื่อย้อนหลัง
   const attendanceType = isBefore(dateIn, startOfDay(today))
-    ? Attendance.Backdated
+    ? Attendance.Backdate
     : type;
 
   if (dateOut && isBefore(dateIn, startOfDay(today))) {
