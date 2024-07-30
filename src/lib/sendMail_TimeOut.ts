@@ -19,8 +19,8 @@ export const sendMailWithTimeOut = async (
   project: string,
   startAt: Date | null,
   endAt: Date | null,
-  dateOut: Date | null,
   tasks: { title: string; status: string }[],
+  type: string,
 ) => {
   const now = new Date();
 
@@ -29,9 +29,6 @@ export const sendMailWithTimeOut = async (
     locale: enUS,
   });
   const formatEndAt = format(endAt || now, "dd MMMM yyyy 'at' hh:mm a", {
-    locale: enUS,
-  });
-  const formatDateOut = format(dateOut || now, "dd MMMM yyyy 'at' hh:mm a", {
     locale: enUS,
   });
 
@@ -58,9 +55,9 @@ export const sendMailWithTimeOut = async (
 
         <p style="color: #4b5563; margin-bottom: 15px;">
           รายละเอียดดังนี้:<br/><br/>
-          <strong>เวลาที่ลงชื่อเริ่มต้น: ${formatStartAt}</strong><br/>
-          <strong>เวลาที่ลงชื่อออก: ${formatDateOut}</strong><br/>
-          <strong>เวลาสิ้นสุดงาน: ${formatEndAt}</strong><br/><br/>
+          <strong>เวลาที่ลงชื่อเข้าทำงาน: ${formatStartAt}</strong><br/>
+           <strong>เวลาสิ้นสุดงาน: ${formatEndAt}</strong><br/><br/>
+          <strong>สถานะการลงชื่อ: ${type}</strong><br/><br/>
           รายละเอียดงานที่ทำวันนี้:<br/><br/>
           ${taskDetails}
          </p>

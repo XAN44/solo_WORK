@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendMailWithTimeIn = async (
+export const sendMailWithTimeInSupervisor = async (
   email: string,
   role: string,
   job: string,
@@ -20,9 +20,14 @@ export const sendMailWithTimeIn = async (
   department: string,
   project: string,
   startAt: Date | null,
+  endAt: Date | null,
+  type: string,
 ) => {
   const now = new Date();
 
+  const formatEndAt = format(endAt || now, "dd MMMM yyyy 'at' hh:mm a", {
+    locale: enUS,
+  });
   const formatStartAt = format(startAt || now, "dd MMMM yyyy 'at' hh:mm a", {
     locale: enUS,
   });
@@ -39,7 +44,9 @@ export const sendMailWithTimeIn = async (
           แผนก:<strong>${department}</strong><br/> 
           ตำแหน่ง:<strong> ${job} ${role}</strong> <br/>
           <strong>เข้าทำงานเมื่อ: ${formatStartAt}</strong><br/>
-  
+          ${endAt ? `<strong>ออกจากงานเมื่อ: ${formatEndAt}</strong><br/>` : ""}
+           <strong>สถานะการลงชื่อ: ${type}</strong><br/><br/>
+
         </p>
         <p style="color: #4b5563;">
           ขออภัย หากคุณไม่ได้มีส่วนเกี่ยวข้องกับเมลชิ้นนี้

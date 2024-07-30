@@ -76,26 +76,85 @@ export const StartLeaveRequestAtion = async (
     },
   });
 
+  const isSupervisor = await db.teamMember.findFirst({
+    where: {
+      isSupervisor: true,
+      team: {
+        member: {
+          some: {
+            userId,
+          },
+        },
+      },
+    },
+    select: {
+      isSupervisor: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  const isAdmin = await db.team.findFirst({
+    where: {
+      member: {
+        some: {
+          userId: user?.user.id,
+        },
+      },
+    },
+    select: {
+      admin: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
   const userData = await getUserById(user?.user.id || "");
   const team = await GetTeamById(user?.user.id || "");
-  const admin = team?.admin?.email || "";
 
-  await sendWithLeaveRequest(
-    create.id,
-    create.title || "",
-    admin,
-    userData?.first_name || "",
-    userData?.last_name || "",
-    userData?.username || "",
-    team?.department || "",
-    typeLeave,
-    tel,
-    reason,
-    dateIn,
-    dateOut,
-    create.statusLeave || "",
-    leaveDuration,
-  );
+  if (isSupervisor?.user?.id === user?.user.id) {
+    // ส่งเมลล์ไปยังแอดมิน
+    await sendWithLeaveRequest(
+      create.id,
+      create.title || "",
+      isAdmin?.admin?.email || "", // ส่งไปยังอีเมลของแอดมิน
+      userData?.first_name || "",
+      userData?.last_name || "",
+      userData?.username || "",
+      team?.department || "",
+      typeLeave,
+      tel,
+      reason,
+      dateIn,
+      dateOut,
+      create.statusLeave || "",
+      leaveDuration,
+    );
+  } else {
+    // ส่งเมลล์ไปยัง Supervisor
+    await sendWithLeaveRequest(
+      create.id,
+      create.title || "",
+      isSupervisor?.user?.email || "",
+      userData?.first_name || "",
+      userData?.last_name || "",
+      userData?.username || "",
+      team?.department || "",
+      typeLeave,
+      tel,
+      reason,
+      dateIn,
+      dateOut,
+      create.statusLeave || "",
+      leaveDuration,
+    );
+  }
 
   return {
     success: `The system will send an email to the admin  `,

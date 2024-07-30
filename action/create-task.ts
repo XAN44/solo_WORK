@@ -17,7 +17,7 @@ import { db } from "../src/lib/db";
 import { Attendance, CreateAt, StatusTask } from "@prisma/client";
 import { auth } from "../auth";
 import { GetAdminByTeamId, GetSupervisorById } from "../data/supervisor";
-import { sendMailWithCreateTask } from "../src/lib/sendMail_StartTask";
+
 import { getUserByEmail, getUserById } from "../data/user";
 import { GetTeamById } from "../data/team";
 import { FetchTask } from "../data/fetch-task";
@@ -25,6 +25,7 @@ import { getLeaveRequestByDate } from "../data/fetch-leaveRequest";
 import { getAttendanceByIdAndDate } from "../data/fetch-attendance";
 import { createAttendence } from "./create-attendence";
 import { revalidatePath } from "next/cache";
+import { createAttendenceBackDated } from "./create-attendenceBackdated";
 
 export const StartWorkAction = async (
   value: z.infer<typeof StartWorkSchema>,
@@ -91,9 +92,6 @@ export const StartWorkAction = async (
     }
   }
 
-  // TODO ตรวจสอบว่ามีการลงชื้อแล้วหรือไม่
-  const existingAttendence = await getAttendanceByIdAndDate(teamMember.id, now);
-
   await db.task.create({
     data: {
       title,
@@ -108,9 +106,11 @@ export const StartWorkAction = async (
     },
   });
 
-  // * หากยังไม่ลงชื่อ ให้ทำการลงชื่อเข้าทำงาน
-  if (existingAttendence.length === 0) {
-    await createAttendence(teamMember.id, today); //* ใช้เวลาปัจจุบัน
+  if (createAt === "Normal") {
+    await createAttendence(teamMember.id, today); // ใช้เวลาปัจจุบัน
+  } else if (createAt === "Backdate") {
+    // ลงชื่อย้อนหลังหากงานเป็นงานย้อนหลัง
+    await createAttendenceBackDated(teamMember.id, startAt, endAt); // ใช้เวลาที่กำหนดในงาน
   }
 
   revalidatePath("/");

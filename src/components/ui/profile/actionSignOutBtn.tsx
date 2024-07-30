@@ -1,33 +1,18 @@
-"use client";
-import React, { startTransition, useState, useTransition } from "react";
-
-import { Popover, PopoverContent, PopoverTrigger } from "../popover";
-import { Button } from "../button";
-
-import { StatusTask, UserLevel } from "@prisma/client";
+import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  StatusWorkSchema,
-  TimeOutWorkSchema,
-} from "../../../../schema/validateStatusWork";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../select";
-import { SelectStatusWork } from "../../../lib/selectTaskStatus";
-import { UpdateStatusTask } from "../../../../action/update-StatusTask";
-import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { AnimatePresence, motion } from "framer-motion";
+import { ClipLoader } from "react-spinners";
 import { MdError } from "react-icons/md";
 import { GiConfirmed } from "react-icons/gi";
-import { ClipLoader } from "react-spinners";
+
+import { TimeOutWorkSchema } from "../../../../schema/validateStatusWork";
 import { UpdateTimeOut } from "../../../../action/create-timeOut";
+import { Button } from "../button";
+import { Form } from "../form";
+import ConfirmModal from "./confirmSignOut";
 
 interface Model {
   id: string;
@@ -36,6 +21,7 @@ interface Model {
 export default function ActionBtn_TimeOut({ id }: Model) {
   const [buttonText, setButtonText] = useState("Check Out");
   const [isPending, startTransition] = useTransition();
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const form = useForm<z.infer<typeof TimeOutWorkSchema>>({
     resolver: zodResolver(TimeOutWorkSchema),
@@ -46,8 +32,13 @@ export default function ActionBtn_TimeOut({ id }: Model) {
   });
 
   const onSubmit = (value: z.infer<typeof TimeOutWorkSchema>) => {
+    setModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setModalOpen(false);
     startTransition(() => {
-      UpdateTimeOut(value).then((data) => {
+      UpdateTimeOut(form.getValues()).then((data) => {
         const isError = !!data?.error;
         toast.custom(
           (t) => (
@@ -82,17 +73,29 @@ export default function ActionBtn_TimeOut({ id }: Model) {
     });
   };
 
+  const handleClose = () => {
+    setModalOpen(false);
+  };
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Button
-          disabled={isPending}
-          type="submit"
-          className="bg-black text-white"
-        >
-          {isPending ? <ClipLoader size={24} color="#ffffff" /> : buttonText}
-        </Button>
-      </form>
-    </Form>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="bg-black text-white"
+          >
+            {isPending ? <ClipLoader size={24} color="#ffffff" /> : buttonText}
+          </Button>
+        </form>
+      </Form>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+      />
+    </>
   );
 }

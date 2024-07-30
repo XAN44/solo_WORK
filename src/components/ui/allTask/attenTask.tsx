@@ -48,6 +48,7 @@ export default function AttenSumary({ data }: Props) {
 
         <Table>
           <TableCaption>A list of tasks and attendance</TableCaption>
+
           <TableHeader>
             <TableRow>
               <TableHead>No</TableHead>
@@ -86,6 +87,7 @@ export default function AttenSumary({ data }: Props) {
                     "text-green-800": attendance.type === "Present",
                     "text-red-800": attendance.type === "Absent",
                     "text-yellow-500/100": attendance.type === "Late",
+                    "text-red-900": attendance.type === "Backdated",
                   })}
                 >
                   {attendance.type || "N/A"}

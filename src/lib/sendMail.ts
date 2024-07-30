@@ -12,7 +12,7 @@ export const sendVerificationEmailByNodemailer = async (
   email: string,
   token: string,
 ) => {
-  const confirmLink = `${process.env.NEXT_PUBLIC_API_URL}/auth/new-verification?token=${token}`;
+  const confirmLink = `${process.env.NEXT_PUBLIC_API_URL}auth/new-verification?token=${token}`;
 
   const mailOptions = {
     from: process.env.EMAIL,

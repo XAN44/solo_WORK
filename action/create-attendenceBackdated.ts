@@ -18,7 +18,11 @@ import { GetAdminInTeam, GetTeamById } from "../data/team";
 import { SiCucumber } from "react-icons/si";
 import { sendMailWithTimeInSupervisor } from "../src/lib/sendMail_SupervisorTimeIn";
 
-export async function createAttendence(teamMemberId: string, dateIn: Date) {
+export async function createAttendenceBackDated(
+  teamMemberId: string,
+  dateIn: Date,
+  dateOut: Date,
+) {
   const user = await auth();
   const today = new Date();
 
@@ -29,31 +33,30 @@ export async function createAttendence(teamMemberId: string, dateIn: Date) {
   // TODO ถ้าลงชื่อหลังจาก 9:00 ถือว่ามาสาย
   const type = dateIn > nineAm ? Attendance.Late : Attendance.Present;
 
-  await db.attendance.create({
-    data: {
-      teamMemberId,
-      dateIn,
-      type,
-    },
-  });
+  // TODO ถ้าลงชื่อเป็นเวลาก่อนหน้าวันนี้ จะเท่ากับลงชื่อย้อนหลัง
+  const attendanceType = isBefore(dateIn, startOfDay(today))
+    ? Attendance.Backdated
+    : type;
 
-  const isSupervisor = await db.teamMember.findFirst({
-    where: {
-      userId: teamMemberId,
-    },
-    select: {
-      isSupervisor: true,
-    },
-  });
+  if (dateOut && isBefore(dateIn, startOfDay(today))) {
+    await db.attendance.create({
+      data: {
+        teamMemberId,
+        dateIn,
+        dateOut,
+        type: attendanceType,
+      },
+    });
+  }
 
   const userData = await getUserById(user?.user.id || "");
   const teamData = await GetTeamById(user?.user.id || "");
-  const supervisorEmail = await GetSupervisorById(user?.user.id || "");
   const adminEmail = await GetAdminInTeam(user?.user.id || "");
+  const dateOutOrNull = dateOut ?? null;
 
-  if (!isSupervisor?.isSupervisor && adminEmail) {
-    await sendMailWithTimeIn(
-      supervisorEmail?.email || "",
+  if (adminEmail) {
+    await sendMailWithTimeInSupervisor(
+      adminEmail,
       userData?.role || "",
       userData?.job || "",
       userData?.first_name || "",
@@ -61,6 +64,8 @@ export async function createAttendence(teamMemberId: string, dateIn: Date) {
       userData?.department || "",
       teamData?.project || "",
       dateIn,
+      dateOutOrNull,
+      attendanceType,
     );
   }
 

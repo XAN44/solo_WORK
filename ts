@@ -1,143 +1,153 @@
-"use client";
-import React, { startTransition, useState, useTransition } from "react";
-
-import { Popover, PopoverContent, PopoverTrigger } from "../popover";
-
-import { StatusTask, UserLevel } from "@prisma/client";
-import { useForm } from "react-hook-form";
+"use server";
 import { z } from "zod";
-import { StatusWorkSchema } from "../../../../schema/validateStatusWork";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../select";
-import { SelectStatusWork } from "../../../lib/selectTaskStatus";
-import { UpdateStatusTask } from "../../../../action/update-StatusTask";
-import { AnimatePresence, motion } from "framer-motion";
-import toast from "react-hot-toast";
-import { MdError } from "react-icons/md";
-import { GiConfirmed } from "react-icons/gi";
-import { ClipLoader } from "react-spinners";
-import { Button } from "../button";
+import { StatusWorkSchema } from "../schema/validateStatusWork";
+import { db } from "../src/lib/db";
+import { revalidatePath } from "next/cache";
+import { GetSupervisorInTeamById } from "../data/supervisor";
+import { auth } from "../auth";
+import { StatusTask } from "@prisma/client";
 
-interface Model {
-  id: string;
-}
+export async function UpdateStatusTask(
+  value: z.infer<typeof StatusWorkSchema>,
+) {
+  try {
+    const validateField = StatusWorkSchema.safeParse(value);
+    const user = await auth();
+    const userId = user?.user.id || "";
 
-export default function ActionBtn_AllTask({ id }: Model) {
-  const [buttonText, setButtonText] = useState("Submit");
-  const [isPending, startTransition] = useTransition();
+    if (!validateField.success) {
+      return { error: "Error: Invalid input" };
+    }
 
-  const form = useForm<z.infer<typeof StatusWorkSchema>>({
-    resolver: zodResolver(StatusWorkSchema),
-    defaultValues: {
-      status: "InProgress",
-      id: id,
-    },
-  });
+    const { id, status } = validateField.data;
 
-  const onSubmit = (value: z.infer<typeof StatusWorkSchema>) => {
-    startTransition(() => {
-      console.log(value);
-      UpdateStatusTask(value).then((data) => {
-        const isError = !!data?.error;
-        toast.custom(
-          (t) => (
-            <AnimatePresence>
-              <motion.div
-                key=""
-                layout
-                initial={{ opacity: 0, scale: 1 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 100, scale: 1 }}
-                className={`flex items-center justify-center rounded-md ${isError ? "bg-destructive" : "bg-emerald-700"} px-6 py-4 text-white shadow-md ${t.visible ? "animate-in" : "animate-out"} `}
-              >
-                {isError ? (
-                  <>
-                    {data.error}
-                    <MdError className="h-6 w-6 text-white" />
-                  </>
-                ) : (
-                  <>
-                    {data?.success}
-                    <GiConfirmed className="h-6 w-6" />
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          ),
-          {
-            duration: 4000,
+    // ตรวจสอบว่า user เป็น supervisor หรือไม่
+    const supervisor = await GetSupervisorInTeamById(userId);
+    // ประกาศตัวแปรรับค่าแอดมิน
+    const isAdmin = user?.user.level === "Admin";
+
+    if (!supervisor && !isAdmin) {
+      return { error: "You are not authorized to update this task" };
+    }
+
+    // ดึงข้อมูล task เพื่อเช็คทีมที่เกี่ยวข้องและผู้สร้าง task
+    const task = await db.task.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        typeOfWork: true,
+        teamMemberId: true,
+        teamMember: {
+          select: {
+            userId: true,
+            team: {
+              select: {
+                id: true,
+              },
+            },
           },
-        );
-      });
+        },
+        status: true, // เพิ่มการดึงสถานะปัจจุบันของงาน
+      },
     });
-  };
 
-  return (
-    <Popover>
-      <PopoverTrigger>
-        <Button variant="outline">Open</Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Work status</h4>
-            <p className="text-sm text-muted-foreground">
-              Choose the work status of your team members.
-            </p>
-          </div>
+    if (!task) {
+      return { error: "Task not found" };
+    }
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Select Status task to member</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {SelectStatusWork.map((d) => (
-                          <SelectItem key={d.value} value={d.value}>
-                            {d.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-              <div className="mt-7">
-                <Button
-                  disabled={isPending}
-                  type="submit"
-                  className="bg-black text-white"
-                >
-                  {isPending ? (
-                    <ClipLoader size={24} color="#ffffff" />
-                  ) : (
-                    buttonText
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
+    if (status === StatusTask.Completed || status === StatusTask.Cancelled) {
+      if (!isAdmin) {
+        return { error: `Only Admin can update to ${status} status` };
+      }
+
+      // TODO หาค่าของเงินที่แอดมินได้ตั้งค่าไว้ว่างานประเภทนั้นๆ จะได้รับเงินเท่าไหร่ต่องาน
+      const settings = await db.accumulationSettings.findFirst({
+        where: {
+          typeOfWork: task.typeOfWork,
+        },
+      });
+
+      if (!settings) {
+        return { error: "No salary settings found for this type of work" };
+      }
+
+      if (task.teamMemberId) {
+        if (status === StatusTask.Completed) {
+          // ค้นหาข้อมูลที่มี teamMemberId ตรงกัน
+          const existingAmount = await db.accumulatedAmount.findFirst({
+            where: {
+              teamMemberId: task.teamMemberId,
+            },
+          });
+
+          if (existingAmount) {
+            // อัปเดตข้อมูลที่มีอยู่
+            await db.accumulatedAmount.update({
+              where: {
+                id: existingAmount.id, // ใช้ id ของข้อมูลที่ค้นพบ
+              },
+              data: {
+                amount: {
+                  increment: settings.amount,
+                },
+              },
+            });
+          } else {
+            // สร้างข้อมูลใหม่ถ้าไม่พบข้อมูลที่ตรงกัน
+            await db.accumulatedAmount.create({
+              data: {
+                teamMemberId: task.teamMemberId,
+                amount: settings.amount,
+              },
+            });
+          }
+        } else if (status === StatusTask.Cancelled) {
+          // ค้นหาข้อมูลที่มี teamMemberId ตรงกัน
+          const existingAmount = await db.accumulatedAmount.findFirst({
+            where: {
+              teamMemberId: task.teamMemberId,
+            },
+          });
+
+          if (existingAmount) {
+            // อัปเดตข้อมูลที่มีอยู่
+            await db.accumulatedAmount.update({
+              where: {
+                id: existingAmount.id, // ใช้ id ของข้อมูลที่ค้นพบ
+              },
+              data: {
+                amount: {
+                  decrement: settings.amount,
+                },
+              },
+            });
+          } else {
+            // สร้างข้อมูลใหม่ถ้าไม่พบข้อมูลที่ตรงกัน
+            await db.accumulatedAmount.create({
+              data: {
+                teamMemberId: task.teamMemberId,
+                amount: -settings.amount,
+              },
+            });
+          }
+        }
+      }
+    }
+
+    // อัพเดทสถานะของ task
+    await db.task.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+    });
+
+    revalidatePath("/");
+    return { success: "Success" };
+  } catch (error) {
+    return { error: "An unexpected error occurred" };
+  }
 }

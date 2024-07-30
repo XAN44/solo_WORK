@@ -6,6 +6,7 @@ import { auth } from "../../auth";
 import toast, { Toaster } from "react-hot-toast";
 import clsx from "clsx";
 import Head from "next/head";
+import { markAbsentUsers } from "../../action/autoAbsent";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,9 +27,6 @@ export default async function RootLayout({
   const session = await auth();
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="favicon.ico" sizes="any" />
-      </head>
       <SessionProvider session={session}>
         <body className={inter.className}>
           <main className="">{children}</main>

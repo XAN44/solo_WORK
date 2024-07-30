@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { format } from "date-fns-tz";
-import { enUS, th } from "date-fns/locale";
+import { th } from "date-fns/locale";
 import { CreateAt } from "@prisma/client";
 
 const transporter = nodemailer.createTransport({
@@ -11,36 +11,32 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendMailWithTimeIn = async (
+export const sendWithApproveTask = async (
   email: string,
-  role: string,
-  job: string,
   name: string,
   last: string,
-  department: string,
-  project: string,
-  startAt: Date | null,
+  title: string,
+  description: string,
+  status: string,
 ) => {
   const now = new Date();
-
-  const formatStartAt = format(startAt || now, "dd MMMM yyyy 'at' hh:mm a", {
-    locale: enUS,
-  });
 
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,
-    subject: `รายงานการลงชื่อจาก ${name} นามสกุล ${last}`,
+    subject: `รายงานถึงคุณ ${name} นามสกุล ${last}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #d1d5db; border-radius: 8px; background-color: #f9fafb;">
-        <h2 style="font-size: 24px; color: #1f2937; margin-bottom: 10px;">Notification of Time-In</h2>
+        <h2 style="font-size: 24px; color: #1f2937; margin-bottom: 10px;">Notification status your task</h2>
         <p style="color: #4b5563; margin-bottom: 15px;">
-          ชื่อ<strong>${name} </strong> นามสกุล <strong>${last} <strong/> <br/> 
-          แผนก:<strong>${department}</strong><br/> 
-          ตำแหน่ง:<strong> ${job} ${role}</strong> <br/>
-          <strong>เข้าทำงานเมื่อ: ${formatStartAt}</strong><br/>
-  
+          หัวข้องาน : <strong>${title}</strong> <br/>
+          รายละเอียดงาน : <strong>${description}</strong> <br/>
+           หัวหน้างานได้ทำการตรวจสอบงานของคุณแล้ว
         </p>
+        <p style="color: #4b5563; margin-bottom: 15px;">
+          สถานะงานปัจจุบัน: <strong>${status}</strong>
+        </p>
+   
         <p style="color: #4b5563;">
           ขออภัย หากคุณไม่ได้มีส่วนเกี่ยวข้องกับเมลชิ้นนี้
         </p>

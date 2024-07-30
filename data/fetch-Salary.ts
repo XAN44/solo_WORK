@@ -20,8 +20,6 @@ export async function FetchDataSumary(id: string) {
     0,
   );
 
-  console.log("Total accumulated amount:", totalAmount); // แสดงผลยอดรวม
-
   return {
     totalAmount, // ส่งคืนยอดรวมของยอดเงินสะสม
   };

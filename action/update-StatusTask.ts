@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { GetSupervisorInTeamById } from "../data/supervisor";
 import { auth } from "../auth";
 import { StatusTask } from "@prisma/client";
+import { sendWithApproveTask } from "../src/lib/sendMail_ApproveTask";
 
 export async function UpdateStatusTask(
   value: z.infer<typeof StatusWorkSchema>,
@@ -22,13 +23,9 @@ export async function UpdateStatusTask(
     const { id, status } = validateField.data;
 
     // ตรวจสอบว่า user เป็น supervisor หรือไม่
-    const supervisor = await GetSupervisorInTeamById(userId);
+    // const supervisor = await GetSupervisorInTeamById(userId);
+    const isSupervisor = user?.user.level === "Supervisor";
     // ประกาศตัวแปรรับค่าแอดมิน
-    const isAdmin = user?.user.level === "Admin";
-
-    if (!supervisor && !isAdmin) {
-      return { error: "You are not authorized to update this task" };
-    }
 
     // ดึงข้อมูล task เพื่อเช็คทีมที่เกี่ยวข้องและผู้สร้าง task
     const task = await db.task.findUnique({
@@ -38,9 +35,20 @@ export async function UpdateStatusTask(
       select: {
         typeOfWork: true,
         teamMemberId: true,
+        title: true,
+        description: true,
+        status: true, // เพิ่มการดึงสถานะปัจจุบันของงาน
+
         teamMember: {
           select: {
             userId: true,
+            user: {
+              select: {
+                email: true,
+                first_name: true,
+                last_name: true,
+              },
+            },
             team: {
               select: {
                 id: true,
@@ -48,7 +56,6 @@ export async function UpdateStatusTask(
             },
           },
         },
-        status: true, // เพิ่มการดึงสถานะปัจจุบันของงาน
       },
     });
 
@@ -56,23 +63,43 @@ export async function UpdateStatusTask(
       return { error: "Task not found" };
     }
 
-    // ตรวจสอบว่าสถานะของงานไม่สามารถเปลี่ยนแปลงได้ถ้าสถานะปัจจุบันเป็น Completed หรือ Cancelled
+    // TODO : หา Admin ของทีม
+    const isAdmin = await db.team.findFirst({
+      where: {
+        id: task?.teamMember?.team?.id,
+        adminId: userId,
+      },
+      select: {
+        admin: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    });
+
     if (
-      task.status === StatusTask.Completed ||
-      task.status === StatusTask.Cancelled
+      task.teamMember?.userId !== user?.user.id &&
+      !isAdmin &&
+      !isSupervisor
     ) {
-      return {
-        error:
-          "Cannot change status as the task is already completed or cancelled",
-      };
+      return { error: "You are not authorized to update this task" };
     }
 
+    // TODO หากสถานะเป็น Completed หรือ Canclled จะต้องผ่านแอดมินหรือหัวหน้างาน
     if (status === StatusTask.Completed || status === StatusTask.Cancelled) {
-      if (!isAdmin) {
-        return { error: `Only Admin can update to ${status} status` };
+      if (!isAdmin && !isSupervisor) {
+        return {
+          error: `Only Admin and Supervisor can update to ${status} status`,
+        };
       }
 
-      // TODO หาค่าของเงินที่แอดมินได้ตั้งค่าไว้ว่างานประเภทนั้นๆ จะได้รับเงินเท่าไหร่ต่องาน
+      // TODO หากงานนั้นๆเป็นของตัวหัวหน้างานเอง จะไม่สามารถอนุมัติงานได้
+      if (isSupervisor && task.teamMember?.userId === userId) {
+        return { error: "Supervisor cannot approve their own task" };
+      }
+
+      //  TODO หาค่าของเงินที่แอดมินได้ตั้งค่าไว้ว่างานประเภทนั้นๆ จะได้รับเงินเท่าไหร่ต่องาน
       const settings = await db.accumulationSettings.findFirst({
         where: {
           typeOfWork: task.typeOfWork,
@@ -146,7 +173,7 @@ export async function UpdateStatusTask(
       }
     }
 
-    // อัพเดทสถานะของ task
+    // TODO อัพเดทสถานะของ task
     await db.task.update({
       where: {
         id,
@@ -155,6 +182,26 @@ export async function UpdateStatusTask(
         status,
       },
     });
+
+    const lastData = await db.task.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        status: true,
+      },
+    });
+
+    // if (lastData) {
+    //   await sendWithApproveTask(
+    //     task.teamMember?.user?.last_name || "",
+    //     task.teamMember?.user?.first_name || "",
+    //     task.teamMember?.user?.last_name || "",
+    //     task.title,
+    //     task.description,
+    //     lastData?.status,
+    //   );
+    // }
 
     revalidatePath("/");
     return { success: "Success" };
