@@ -1,7 +1,6 @@
 import nodemailer from "nodemailer";
 import { format } from "date-fns-tz";
 import { enUS, th } from "date-fns/locale";
-import { CreateAt } from "@prisma/client";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -21,6 +20,7 @@ export const sendMailWithTimeOut = async (
   startAt: Date | null,
   endAt: Date | null,
   dateOut: Date | null,
+  tasks: { title: string; status: string }[],
 ) => {
   const now = new Date();
 
@@ -35,7 +35,13 @@ export const sendMailWithTimeOut = async (
     locale: enUS,
   });
 
-  // แปลค่า createAt เป็นข้อความ
+  // Task details
+  const taskDetails = tasks
+    .map(
+      (task) =>
+        `<p>งาน: <strong>${task.title}</strong>, สถานะ: <strong>${task.status}</strong></p>`,
+    )
+    .join("<br>");
 
   const mailOptions = {
     from: process.env.EMAIL,
@@ -54,7 +60,9 @@ export const sendMailWithTimeOut = async (
           รายละเอียดดังนี้:<br/><br/>
           <strong>เวลาที่ลงชื่อเริ่มต้น: ${formatStartAt}</strong><br/>
           <strong>เวลาที่ลงชื่อออก: ${formatDateOut}</strong><br/>
-          <strong>เวลาสิ้นสุดงาน: ${formatEndAt}</strong><br/>
+          <strong>เวลาสิ้นสุดงาน: ${formatEndAt}</strong><br/><br/>
+          รายละเอียดงานที่ทำวันนี้:<br/><br/>
+          ${taskDetails}
          </p>
 
         <p style="color: #4b5563;">

@@ -1,9 +1,16 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { AccumulationSettingsSchema } from "../../../../schema/validateSalary";
+import { JoinTeam } from "../../../../schema/validateJoinTeam";
 import { z } from "zod";
-import { typeOfWork } from "@prisma/client";
+import { useEffect, useState, useTransition } from "react";
+import { AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+import { MdError } from "react-icons/md";
+import { GiConfirmed } from "react-icons/gi";
+import { ClipLoader } from "react-spinners";
+import { JoinTeamAction, getTeams } from "../../../../action/create-joinTeam";
 import {
   Form,
   FormControl,
@@ -13,16 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../form";
-import { Input } from "../input";
 import { Button } from "../button";
-import { useEffect, useState, useTransition } from "react";
-import { AnimatePresence } from "framer-motion";
-import toast from "react-hot-toast";
-import { motion } from "framer-motion";
-import { MdError } from "react-icons/md";
-import { GiConfirmed } from "react-icons/gi";
-import { ClipLoader } from "react-spinners";
-import { UpdateSalary } from "../../../../action/update-salary";
 import {
   Select,
   SelectContent,
@@ -30,8 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../select";
-import { getTeams, JoinTeamAction } from "../../../../action/create-joinTeam";
-import { JoinTeam } from "../../../../schema/validateJoinTeam";
+
 type User = {
   id: string;
   username: string | null;
@@ -64,8 +61,7 @@ export default function FormJoinTeam() {
   });
 
   const [model, setModel] = useState<Team[]>([]);
-
-  const [buttonText, setButtonText] = useState("Save Settings");
+  const [buttonText, setButtonText] = useState("Join Team");
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -112,6 +108,10 @@ export default function FormJoinTeam() {
     });
   };
 
+  const supervisorsAvailable = model.some((team) =>
+    team.member.some((member) => member.user !== null),
+  );
+
   return (
     <>
       <div className="flex items-start justify-start">
@@ -139,19 +139,24 @@ export default function FormJoinTeam() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {model.map((d) => (
-                        <>
-                          {d.member
+                      {supervisorsAvailable ? (
+                        model.flatMap((d) =>
+                          d.member
                             .filter((f) => f.user !== null)
                             .map((member, i) => (
-                              <>
-                                <SelectItem value={member.user?.id || ""}>
-                                  {member.user?.username}
-                                </SelectItem>
-                              </>
-                            ))}
-                        </>
-                      ))}
+                              <SelectItem
+                                key={member.user?.id}
+                                value={member.user?.id || ""}
+                              >
+                                {member.user?.username}
+                              </SelectItem>
+                            )),
+                        )
+                      ) : (
+                        <div className="p-4 text-red-500">
+                          Waiting for admin to assign a supervisor.
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                   <FormDescription>Select Supervisor</FormDescription>

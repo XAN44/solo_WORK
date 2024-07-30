@@ -20,12 +20,6 @@ export async function UpdateStatusTask(
 
   const { id, status } = validateField.data;
 
-  // ตรวจสอบว่า user เป็น supervisor หรือไม่
-  const supervisor = await GetSupervisorInTeamById(userId);
-  if (!supervisor) {
-    return { error: "You are not a supervisor" };
-  }
-
   // ดึงข้อมูล task เพื่อเช็คทีมที่เกี่ยวข้องและผู้สร้าง task
   const task = await db.task.findUnique({
     where: {
@@ -52,37 +46,17 @@ export async function UpdateStatusTask(
     return { error: "Task not found" };
   }
 
-  // ตรวจสอบว่าทีมของ task ตรงกับทีมของ supervisor หรือไม่
-  const supervisorTeamIds = supervisor.teamMember.map((tm) => tm.team?.id);
-  if (!supervisorTeamIds.includes(task.teamMember?.team?.id)) {
-    return { error: "You are not authorized to update this task" };
+  const isAdmin = user?.user.level === "Admin"; // ตรวจสอบสถานะของ Admin จากข้อมูล user
+
+  // ตรวจสอบว่างานนั้นเคยถูกอัพเดทเป็น Completed หรือไม่
+  if (task.status === StatusTask.Completed) {
+    return {
+      error:
+        "Task has already been marked as Completed and cannot be updated again.",
+    };
   }
 
-  // ตรวจสอบว่า task ถูกสร้างโดย supervisor เองหรือไม่
-  const isTaskCreatedBySupervisor = task.teamMember?.userId === userId;
-
-  // ตรวจสอบสถานะใหม่ของงาน
   if (status === StatusTask.Completed) {
-    const isAdmin = user?.user.level === "Admin"; // ตรวจสอบสถานะของ Admin จากข้อมูล user
-
-    // ตรวจสอบว่างานนั้นเคยถูกอัพเดทเป็น Completed หรือไม่
-    if (task.status === StatusTask.Completed) {
-      return {
-        error:
-          "Task has already been marked as Completed and cannot be updated again.",
-      };
-    }
-
-    // สมาชิกในทีมไม่สามารถอัพเดตสถานะเป็น Completed ได้
-    if (!isAdmin && supervisor.teamMember.some((tm) => tm.userId === userId)) {
-      return { error: "Team members cannot mark tasks as Completed." };
-    }
-
-    // Supervisor ไม่สามารถอัพเดตสถานะเป็น Completed ได้โดยตรงถ้าตนเองสร้างงาน
-    if (!isAdmin && isTaskCreatedBySupervisor) {
-      return { error: "Supervisors cannot approve their own tasks." };
-    }
-
     const settings = await db.accumulationSettings.findFirst({
       where: {
         typeOfWork: task.typeOfWork,
@@ -110,6 +84,26 @@ export async function UpdateStatusTask(
           amount: settings.amount,
         },
       });
+    }
+  }
+
+  if (!isAdmin) {
+    // ตรวจสอบว่า user เป็น supervisor หรือไม่
+    const supervisor = await GetSupervisorInTeamById(userId);
+    if (!supervisor) {
+      return { error: "You are not a supervisor" };
+    }
+
+    // ตรวจสอบว่าทีมของ task ตรงกับทีมของ supervisor หรือไม่
+    const supervisorTeamIds = supervisor.teamMember.map((tm) => tm.team?.id);
+    if (!supervisorTeamIds.includes(task.teamMember?.team?.id)) {
+      return { error: "You are not authorized to update this task" };
+    }
+
+    // ตรวจสอบว่า task ถูกสร้างโดย supervisor เองหรือไม่
+    const isTaskCreatedBySupervisor = task.teamMember?.userId === userId;
+    if (isTaskCreatedBySupervisor) {
+      return { error: "Supervisors cannot approve their own tasks." };
     }
   }
 

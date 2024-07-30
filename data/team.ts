@@ -26,3 +26,25 @@ export async function GetTeamById(userId: string) {
 
   return teamMember?.team || null;
 }
+
+export async function GetAdminInTeam(userId: string) {
+  // ค้นหาข้อมูลสมาชิกทีมที่มี userId ตรงกัน
+  const teamMember = await db.team.findFirst({
+    where: {
+      member: {
+        some: {
+          userId,
+        },
+      },
+    },
+    select: {
+      admin: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return teamMember?.admin?.email || null;
+}

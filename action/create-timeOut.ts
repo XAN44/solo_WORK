@@ -6,6 +6,9 @@ import { db } from "../src/lib/db";
 import { revalidatePath } from "next/cache";
 import { sendMailWithTimeOut } from "../src/lib/sendMail_TimeOut";
 import { getUserById } from "../data/user";
+import { endOfDay, startOfDay } from "date-fns";
+import { GetAdminByTeamId } from "../data/supervisor";
+import { GetTeamById } from "../data/team";
 
 export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
   // Validate the input using Zod schema
@@ -33,6 +36,7 @@ export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
       dateOut: true,
       teamMember: {
         select: {
+          id: true,
           userId: true,
           team: {
             select: {
@@ -78,23 +82,40 @@ export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
     data: { dateOut },
   });
 
-  const supervisor = attendance.teamMember?.team?.member.find(
-    (member) => member.isSupervisor,
-  )?.user;
+  const taskToday = await db.task.findMany({
+    where: {
+      teamMemberId: attendance.teamMember.id,
+      dateCreateAt: {
+        gte: startOfDay(new Date()),
+        lte: endOfDay(new Date()),
+      },
+    },
+  });
 
-  if (supervisor?.email) {
-    await sendMailWithTimeOut(
-      supervisor.email,
-      dataUser.username || "",
-      dataUser.first_name || "",
-      dataUser.last_name || "",
-      dataUser.department || "",
-      attendance.teamMember.team?.project || "",
-      attendance.dateIn,
-      attendance.dateOut,
-      dateOut,
-    );
+  if (taskToday.length === 0) {
+    return {
+      error:
+        "You haven't started work today. The system therefore does not send mail to Admin.",
+    };
   }
+
+  const team = await GetTeamById(user?.user.id || "");
+  const emailAdmin = (await team?.admin?.email) || "";
+  await sendMailWithTimeOut(
+    emailAdmin,
+    dataUser.username || "",
+    dataUser.first_name || "",
+    dataUser.last_name || "",
+    dataUser.department || "",
+    attendance.teamMember.team?.project || "",
+    attendance.dateIn,
+    attendance.dateOut,
+    dateOut,
+    taskToday.map((task) => ({
+      title: task.title,
+      status: task.status,
+    })), // ส่งข้อมูล tasks ที่ถูกต้อง
+  );
 
   revalidatePath("/");
   return { success: "Check-out successful" };

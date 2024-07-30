@@ -56,13 +56,9 @@ export const StartWorkAction = async (
     };
   }
 
-  // TODO ตรวจสอบว่ามีการลงชื้อแล้วหรือไม่
-  const existingAttendence = await getAttendanceByIdAndDate(userId, now);
-
   // TODO ใช้สำหรับการเช็คเวลาลงชื่อ
   const today = new Date();
 
-  // * หากยังไม่ลงชื่อ ให้ทำการลงชื่อเข้าทำงาน
   const teamMember = await db.teamMember.findFirst({
     where: { userId: userId },
   });
@@ -71,7 +67,10 @@ export const StartWorkAction = async (
     return { error: "Team member not found" };
   }
 
-  const task = await db.task.create({
+  // TODO ตรวจสอบว่ามีการลงชื้อแล้วหรือไม่
+  const existingAttendence = await getAttendanceByIdAndDate(teamMember.id, now);
+
+  await db.task.create({
     data: {
       title,
       description,
@@ -85,46 +84,14 @@ export const StartWorkAction = async (
     },
   });
 
+  // * หากยังไม่ลงชื่อ ให้ทำการลงชื่อเข้าทำงาน
   if (existingAttendence.length === 0) {
     await createAttendence(teamMember.id, today); //* ใช้เวลาปัจจุบัน
+    console.log(teamMember.id, "TEAMMMMMMMMM");
   }
-  const supervisor = await GetSupervisorById(user?.user.id || "");
-  const userData = await getUserById(user?.user.id || "");
-  const team = await GetTeamById(user?.user.id || "");
-
-  // ตรวจสอบว่า `supervisor` เป็นคนสร้างงานเองหรือไม่
-  const isSupervisorCreatingTask = teamMember.isSupervisor;
-
-  let recipientEmail = "";
-
-  if (isSupervisorCreatingTask) {
-    // ส่งอีเมลไปที่ admin ของทีม
-    recipientEmail = team?.admin?.email || "";
-  } else {
-    // ส่งอีเมลไปที่ supervisor
-    recipientEmail = supervisor?.email || "";
-  }
-
-  await sendMailWithCreateTask(
-    recipientEmail,
-    user?.user.username || "",
-    userData?.first_name || "",
-    userData?.last_name || "",
-    team?.department || "",
-    supervisor?.username || "",
-    team?.project || "",
-    task?.title || "",
-    task?.status || "",
-    startAt,
-    endAt,
-    description,
-    typeOfWork,
-    createAt,
-  );
 
   revalidatePath("/");
   return {
-    success: ` 
-success ! The system will send an email to ${isSupervisorCreatingTask ? "admin" : "supervisor"}.`,
+    success: ` success create Task`,
   };
 };

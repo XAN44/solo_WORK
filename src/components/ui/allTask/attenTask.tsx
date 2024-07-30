@@ -37,7 +37,7 @@ export default function AttenSumary({ data }: Props) {
 
   return (
     <div className="h-full w-full">
-      <h1 className="text-xl font-bold">Summary of Attendance</h1>
+      <h1 className="text-xl font-bold">Summary of Attendance </h1>
       <div className="flex flex-col p-3">
         <button
           onClick={() => exportAttenToExcel(data)}
