@@ -15,7 +15,6 @@ export const {
 } = NextAuth({
   pages: {
     signIn: "/auth/sign-in",
-
     error: "/auth/error",
   },
   callbacks: {
@@ -63,5 +62,6 @@ export const {
   },
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET,
   ...authConfig,
 });
