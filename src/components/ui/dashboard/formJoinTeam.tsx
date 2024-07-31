@@ -28,7 +28,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../select";
-import { useQuery } from "@tanstack/react-query";
 
 type User = {
   id: string;
@@ -45,17 +44,14 @@ type TeamMember = {
   user: User | null;
 };
 
-interface Team {
+type Team = {
   id: string;
   department: string;
   project: string;
   member: TeamMember[];
-}
+};
 
-interface FormJoinTeamProps {
-  team: Team[];
-}
-export default function FormJoinTeam({ team }: FormJoinTeamProps) {
+export default function FormJoinTeam() {
   const form = useForm<z.infer<typeof JoinTeam>>({
     resolver: zodResolver(JoinTeam),
     defaultValues: {
@@ -64,19 +60,16 @@ export default function FormJoinTeam({ team }: FormJoinTeamProps) {
     mode: "onChange",
   });
 
-  const { data, error, isError, isLoading } = useQuery({
-    queryKey: ["teams"],
-    queryFn: getTeams,
-  });
-
-  const supervisorsAvailable = data?.some((team) =>
-    team.member.some((member) => member.user !== null),
-  );
-  console.log(supervisorsAvailable);
-
+  const [model, setModel] = useState<Team[]>([]);
   const [buttonText, setButtonText] = useState("Join Team");
   const [isPending, startTransition] = useTransition();
-  const [model, setModel] = useState<Team[]>([]); // เปลี่ยนชื่อจาก team เป็น Team
+
+  useEffect(() => {
+    startTransition(async () => {
+      const data = await getTeams();
+      setModel(data);
+    });
+  }, []);
 
   const onSubmit = (value: z.infer<typeof JoinTeam>) => {
     startTransition(() => {
@@ -115,6 +108,10 @@ export default function FormJoinTeam({ team }: FormJoinTeamProps) {
     });
   };
 
+  const supervisorsAvailable = model.some((team) =>
+    team.member.some((member) => member.user !== null),
+  );
+
   return (
     <>
       <div className="flex items-start justify-start">
@@ -146,7 +143,7 @@ export default function FormJoinTeam({ team }: FormJoinTeamProps) {
                         model.flatMap((d) =>
                           d.member
                             .filter((f) => f.user !== null)
-                            .map((member) => (
+                            .map((member, i) => (
                               <SelectItem
                                 key={member.user?.id}
                                 value={member.user?.id || ""}

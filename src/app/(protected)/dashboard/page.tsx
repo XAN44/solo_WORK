@@ -10,14 +10,11 @@ import { currentUser } from "../../../lib/auth";
 import ConfigSalary from "../../../components/ui/dashboard/configSalary";
 import JoinTeam from "../../../components/ui/dashboard/joinTeam";
 import { FetchTeam } from "../../../../data/fetchTeam-CLoseJoin";
-import { getTeams } from "../../../../action/create-joinTeam";
-import { useQuery } from "@tanstack/react-query";
 
 async function Page() {
   const user = await currentUser();
   const data = await getProfileTeamById(user?.id || "");
   const userTeamMembership = await FetchTeam();
-  const team = await getTeams();
 
   return (
     <div className="h-full w-full">
