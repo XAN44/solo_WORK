@@ -10,6 +10,6 @@ export const authRoutes = [
 // TODO:apiAuthPrefix: พรีฟิกซ์สำหรับเส้นทาง API ที่เกี่ยวข้องกับการรับรองตัวตน.
 export const apiAuthPrefix = "/api/auth";
 // TODO:DEFAULT_LOGIN_REDIRECT: เส้นทางที่ผู้ใช้จะถูกนำไปหลังจากการล็อกอินสำเร็จ.
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard";
+export const DEFAULT_LOGIN_REDIRECT = `${process.env.NEXTAUTH_URL}/dashboard`;
 
 // * โค้ดส่วนนี้ใช้กับไฟล์ middleware.ts
