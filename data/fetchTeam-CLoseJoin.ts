@@ -4,15 +4,32 @@ import { auth } from "../auth";
 import { db } from "../src/lib/db";
 
 export async function FetchTeam() {
-  const user = await auth();
-  const checkTeam = await db.teamMember.findFirst({
-    where: {
-      userId: user?.user.id,
-    },
-    select: {
-      id: true,
-    },
-  });
+  try {
+    // ดึงข้อมูลผู้ใช้
+    const user = await auth();
 
-  return checkTeam;
+    // ตรวจสอบว่า user มี id หรือไม่
+    if (!user || !user.user.id) {
+      console.log("User not found or user ID is missing.");
+      return null;
+    }
+
+    console.log(user.user.email);
+
+    // ค้นหาข้อมูลทีมของผู้ใช้
+    const checkTeam = await db.teamMember.findFirst({
+      where: {
+        user: {
+          id: user.user.id,
+        },
+      },
+      select: {
+        user: true,
+      },
+    });
+
+    return { success: "Hello !" };
+  } catch (error) {
+    return error;
+  }
 }
