@@ -1,15 +1,18 @@
-"use client";
-import React from "react";
-import { Button } from "../../../components/ui/button";
+import dynamic from "next/dynamic";
 import Cardwarpper from "../../../components/ui/cardwarpper/cardwarpper";
-import Form_LOGIN from "../../../components/auth/form_Login";
 
-export default function page() {
+const Form_LOGIN = dynamic(
+  () => import("../../../components/auth/form_Login"),
+  {
+    ssr: false, // โหลดเฉพาะบน client-side
+  },
+);
+
+export default function Page() {
   return (
-    // *ปรับแต่งหัวข้อได้ในหน้านี้ หรือหากต้องการอยากจะแก้ไขตัว UI ทั้งหมด Ctrl + Click ไปที่ Cardwarpper
     <Cardwarpper
-      bar_content="if you don't have account "
-      bar_title="Sign-In "
+      bar_content="if you don't have an account "
+      bar_title="Sign-In"
       bar_sub="REGISTER"
       href="/auth/sign-up"
       color=""

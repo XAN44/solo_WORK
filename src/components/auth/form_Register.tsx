@@ -1,5 +1,5 @@
 "use client";
-import React, { startTransition, useEffect, useState } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +28,11 @@ import FormError from "../ui/Form-Error";
 import { Register_Action } from "../../../action/register";
 import { DepartMent, Jobs, SelectLevel, SelectRole } from "../../lib/select";
 import { UserLevel, UserRole } from "@prisma/client";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import toast from "react-hot-toast";
+import { MdError } from "react-icons/md";
+import { GiConfirmed } from "react-icons/gi";
+import { ClipLoader } from "react-spinners";
 
 interface Props {
   currentStep: number;
@@ -43,6 +47,7 @@ const Form_Register: React.FC<Props> = ({
 }) => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
@@ -93,19 +98,41 @@ const Form_Register: React.FC<Props> = ({
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: 100 },
   };
+  const [buttonText, setButtonText] = useState("Sign-up");
 
   const onSubmit = (value: z.infer<typeof SignUpSchema>) => {
-    setError("");
-    setSuccess("");
     startTransition(() => {
       Register_Action(value).then((data) => {
-        if (data.success) {
-          setSuccess(data.success);
-          onSuccess();
-        } else {
-          setError(data.error);
-          onError();
-        }
+        const isError = !!data?.error;
+        toast.custom(
+          (t) => (
+            <AnimatePresence>
+              <motion.div
+                key=""
+                layout
+                initial={{ opacity: 0, scale: 1 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 100, scale: 1 }}
+                className={`flex items-center justify-center rounded-md ${isError ? "bg-destructive" : "bg-emerald-700"} px-6 py-4 text-white shadow-md ${t.visible ? "animate-in" : "animate-out"} `}
+              >
+                {isError ? (
+                  <>
+                    {data.error}
+                    <MdError className="h-6 w-6 text-white" />
+                  </>
+                ) : (
+                  <>
+                    {data?.success}
+                    <GiConfirmed className="h-6 w-6" />
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          ),
+          {
+            duration: 4000,
+          },
+        );
       });
     });
   };
@@ -408,12 +435,17 @@ const Form_Register: React.FC<Props> = ({
             </div>
             <div className="mt-10 flex flex-col">
               {currentStep === 3 ? (
-                <Button type="submit" disabled={!isDirty || !isValid}>
-                  Create Account
+                <Button
+                  type="submit"
+                  disabled={!isDirty || !isValid || isPending}
+                >
+                  {isPending ? (
+                    <ClipLoader size={24} color="#ffffff" />
+                  ) : (
+                    buttonText
+                  )}
                 </Button>
-              ) : (
-                <></>
-              )}
+              ) : null}
             </div>
           </form>
         </Form>

@@ -1,14 +1,23 @@
-import React from "react";
-import { getProfileTeamById } from "../../../../data/user";
-import Admin from "../../../components/ui/dashboard/admin";
+import dynamic from "next/dynamic";
 import LevelGate from "../../auth/Level-Gate";
 import { UserLevel } from "@prisma/client";
-import Attendence from "../../../components/ui/dashboard/attendence";
-import YourProfile from "../../../components/ui/dashboard/Profile";
-import { currentUser } from "../../../lib/auth";
-import ConfigSalary from "../../../components/ui/dashboard/configSalary";
-import JoinTeam from "../../../components/ui/dashboard/joinTeam";
 import { FetchTeam } from "../../../../data/fetchTeam-CLoseJoin";
+import { getProfileTeamById } from "../../../../data/user";
+import { currentUser } from "../../../lib/auth";
+
+const Admin = dynamic(() => import("../../../components/ui/dashboard/admin"));
+const Attendence = dynamic(
+  () => import("../../../components/ui/dashboard/attendence"),
+);
+const YourProfile = dynamic(
+  () => import("../../../components/ui/dashboard/Profile"),
+);
+const ConfigSalary = dynamic(
+  () => import("../../../components/ui/dashboard/configSalary"),
+);
+const JoinTeam = dynamic(
+  () => import("../../../components/ui/dashboard/joinTeam"),
+);
 
 async function Page() {
   const user = await currentUser();
@@ -25,7 +34,6 @@ async function Page() {
           <Admin />
         </LevelGate>
 
-        {/* แสดง Attendence สำหรับผู้ที่มีทีมและแอดมิน */}
         {hasTeam || isAdmin ? <Attendence /> : null}
 
         {data?.id ? <YourProfile id={data?.id || ""} /> : null}
