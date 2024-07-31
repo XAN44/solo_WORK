@@ -86,14 +86,31 @@ export default function FormJoinTeam() {
                 exit={{ opacity: 0, x: 100, scale: 1 }}
                 className={`flex items-center justify-center rounded-md ${isError ? "bg-destructive" : "bg-emerald-700"} px-6 py-4 text-white shadow-md ${t.visible ? "animate-in" : "animate-out"} `}
               >
-                {isError: {error.message}</div>;
-  }
+                {isError ? (
+                  <>
+                    {data.error}
+                    <MdError className="h-6 w-6 text-white" />
+                  </>
+                ) : (
+                  <>
+                    {data?.success}
+                    <GiConfirmed className="h-6 w-6" />
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          ),
+          {
+            duration: 4000,
+          },
+        );
+      });
+    });
+  };
 
-  const supervisorsAvailable = data?.some((team) =>
+  const supervisorsAvailable = model.some((team) =>
     team.member.some((member) => member.user !== null),
   );
-
-  console.log(supervisorsAvailable);
 
   return (
     <>
@@ -123,10 +140,10 @@ export default function FormJoinTeam() {
                     </FormControl>
                     <SelectContent>
                       {supervisorsAvailable ? (
-                        data.flatMap((d) =>
+                        model.flatMap((d) =>
                           d.member
                             .filter((f) => f.user !== null)
-                            .map((member) => (
+                            .map((member, i) => (
                               <SelectItem
                                 key={member.user?.id}
                                 value={member.user?.id || ""}
