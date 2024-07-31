@@ -35,6 +35,17 @@ async function Page() {
         <LevelGate allowedLevel={UserLevel.Admin}>
           <ConfigSalary />
         </LevelGate>
+        <LevelGate allowedLevel={UserLevel.General}>
+          {userTeamMembership ? null : (
+            <div className=" ">
+              <h1 className="mb-3">
+                You don`t have a team yet. Make a team selection to display
+                additional content.
+              </h1>
+              <JoinTeam />
+            </div>
+          )}
+        </LevelGate>
       </div>
     </div>
   );
