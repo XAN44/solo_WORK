@@ -23,7 +23,7 @@ export const sendMailWithTimeIn = async (
 ) => {
   const now = new Date();
 
-  const formatStartAt = format(startAt || now, "dd MMMM yyyy 'at' hh:mm a", {
+  const formatStartAt = format(new Date(startAt || ""), "dd MMM yyyy HH:mm a", {
     locale: enUS,
   });
 
