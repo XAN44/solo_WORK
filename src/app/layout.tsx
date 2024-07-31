@@ -9,6 +9,7 @@ import Head from "next/head";
 
 import { Suspense } from "react";
 import Loading from "./loading";
+import Provider from "../util/Provider";
 
 export const maxDuration = 20;
 const inter = Inter({ subsets: ["latin"] });
@@ -29,11 +30,13 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <Suspense fallback={<Loading />}>
         <SessionProvider session={session}>
           <body className={inter.className}>
-            <main className="h-[100vh]">{children}</main>
+            <main className="h-[100vh]">
+              <Provider>{children}</Provider>
+            </main>
             <Toaster />
           </body>
         </SessionProvider>

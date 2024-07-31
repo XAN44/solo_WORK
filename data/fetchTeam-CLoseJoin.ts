@@ -17,7 +17,7 @@ export async function FetchTeam() {
     console.log(user.user.email);
 
     // ค้นหาข้อมูลทีมของผู้ใช้
-    const checkTeam = await db.teamMember.findFirst({
+    await db.teamMember.findFirst({
       where: {
         user: {
           id: user.user.id,
@@ -28,8 +28,8 @@ export async function FetchTeam() {
       },
     });
 
-    return { success: "Hello !" };
+    return { success: "Have team" };
   } catch (error) {
-    return error;
+    return { error: error };
   }
 }

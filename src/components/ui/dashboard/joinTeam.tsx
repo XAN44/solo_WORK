@@ -7,7 +7,32 @@ import TogleStartTask from "../profile/togleShowStartTask";
 import ConfgigStartSalary from "./togleStartConfigSalary";
 import ShowTeamForJoin from "./togleShowTeam";
 
-export default function JoinTeam() {
+type User = {
+  id: string;
+  username: string | null;
+  email: string | null;
+  emailVerified: Date | null;
+  password: string | null;
+  image: string | null;
+  first_name: string | null;
+  last_name: string | null;
+};
+
+type TeamMember = {
+  user: User | null;
+};
+
+interface Team {
+  id: string;
+  department: string;
+  project: string;
+  member: TeamMember[];
+}
+
+interface FormJoinTeamProps {
+  team: Team[]; // เปลี่ยนชื่อจาก Team เป็น team เพื่อหลีกเลี่ยงการสับสน
+}
+export default function JoinTeam({ team }: FormJoinTeamProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = () => {
@@ -36,7 +61,9 @@ export default function JoinTeam() {
         </motion.div>
       </motion.div>
 
-      {isOpen && <ShowTeamForJoin isOpen={isOpen} onClose={handleClose} />}
+      {isOpen && (
+        <ShowTeamForJoin team={team} isOpen={isOpen} onClose={handleClose} />
+      )}
     </>
   );
 }

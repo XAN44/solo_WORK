@@ -10,45 +10,13 @@ import { currentUser } from "../../../lib/auth";
 import ConfigSalary from "../../../components/ui/dashboard/configSalary";
 import JoinTeam from "../../../components/ui/dashboard/joinTeam";
 import { FetchTeam } from "../../../../data/fetchTeam-CLoseJoin";
+import { getTeams } from "../../../../action/create-joinTeam";
+import { useQuery } from "@tanstack/react-query";
 
 async function Page() {
   const user = await currentUser();
-  const data = await getProfileTeamById(user?.id || "");
-  const userTeamMembership = await FetchTeam();
 
-  return (
-    <div className="h-full w-full">
-      <div className="flex flex-col space-y-3 md:flex-row md:space-x-3 md:space-y-0">
-        <LevelGate allowedLevel={UserLevel.Admin}>
-          <Admin />
-        </LevelGate>
-        {userTeamMembership ? <Attendence /> : null}
-        <LevelGate allowedLevel={UserLevel.Admin}>
-          <Attendence />
-        </LevelGate>
-        {data?.id ? (
-          <>
-            <YourProfile id={data?.id || ""} />
-          </>
-        ) : null}
-
-        <LevelGate allowedLevel={UserLevel.Admin}>
-          <ConfigSalary />
-        </LevelGate>
-        <LevelGate allowedLevel={UserLevel.General}>
-          {userTeamMembership ? null : (
-            <div className=" ">
-              <h1 className="mb-3">
-                You don`t have a team yet. Make a team selection to display
-                additional content.
-              </h1>
-              <JoinTeam />
-            </div>
-          )}
-        </LevelGate>
-      </div>
-    </div>
-  );
+  return <div className="h-full w-full">{user?.username}</div>;
 }
 
 export default Page;
