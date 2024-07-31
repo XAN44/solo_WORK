@@ -6,9 +6,10 @@ import { ExtendendUser } from "../../../../app/types/next-auth";
 import UserInfo from "./userInfo";
 import Btn_signOut from "../../../auth/btn_signOut";
 import { useState } from "react";
+import { User } from "../../../../types/modalSumary";
 
 interface Props {
-  user?: ExtendendUser;
+  user: User;
 }
 
 export default function Sidebar_Body({ user }: Props) {

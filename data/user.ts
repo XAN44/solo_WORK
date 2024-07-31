@@ -57,6 +57,36 @@ export const getUserById = async (id: string) => {
   }
 };
 
+export const getUserByIdBackUp = async (id: string) => {
+  try {
+    const user = await db.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        username: true,
+        email: true,
+        job: true,
+        role: true,
+        level: true,
+        department: true,
+      },
+    });
+
+    // ตรวจสอบว่าข้อมูล user มีอยู่จริงหรือไม่
+    if (!user) {
+      return { error: "User not found" };
+    }
+
+    // ถ้าข้อมูล user มีอยู่จริง คืนค่าข้อมูล user
+    return { success: user };
+  } catch (error) {
+    // จัดการกรณีที่เกิดข้อผิดพลาดในการดึงข้อมูล
+    return { error: "Error retrieving user data" };
+  }
+};
+
 export const getMemberById = async (id: string) => {
   // TODO : ดึงข้อมูลผู้ใช้ด้วย ID
 

@@ -1,6 +1,6 @@
 // * ใช้สำหรับตรวจสอบความถูกต้องของข้อมูล
 
-import { UserLevel } from "@prisma/client";
+import { UserLevel, UserRole } from "@prisma/client";
 import * as z from "zod";
 
 export const SignInSchema = z.object({
@@ -26,7 +26,7 @@ export const SignUpSchema = z
     confirmPassword: z.string().min(4),
     first_name: z.string(),
     last_name: z.string().min(1, { message: "invald last name" }),
-    role: z.string({ required_error: "ples" }),
+    role: z.nativeEnum(UserRole),
     level: z.nativeEnum(UserLevel),
     job: z.string(),
     department: z.string(),

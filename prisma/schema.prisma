@@ -20,6 +20,11 @@ enum UserLevel {
   Supervisor
 }
 
+enum UserRole {
+  Employe
+  Trainee
+}
+
 model User {
   id            String     @id @default(cuid())
   username      String?    @unique
@@ -30,7 +35,7 @@ model User {
   Session       Session[]
   first_name    String?
   last_name     String?
-  role          String?
+  role          UserRole?
   level         UserLevel?
   job           String?
   department    String?
@@ -71,7 +76,7 @@ model teamMember {
   isSupervisor      Boolean?            @default(false)
   StartAt           DateTime?
   endAt             DateTime?
-  user              User?               @relation(fields: [userId], references: [id])
+  user              User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
   team              team?               @relation(fields: [teamId], references: [id], onDelete: Cascade)
   task              task[]
   attendance        attendance[]

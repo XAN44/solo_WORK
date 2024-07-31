@@ -5,19 +5,14 @@ import { db } from "../src/lib/db";
 
 export async function FetchTeam() {
   try {
-    // ดึงข้อมูลผู้ใช้
     const user = await auth();
 
-    // ตรวจสอบว่า user มี id หรือไม่
     if (!user || !user.user.id) {
       console.log("User not found or user ID is missing.");
-      return null;
+      return { success: false };
     }
 
-    console.log(user.user.email);
-
-    // ค้นหาข้อมูลทีมของผู้ใช้
-    await db.teamMember.findFirst({
+    const data = await db.teamMember.findFirst({
       where: {
         user: {
           id: user.user.id,
@@ -28,7 +23,11 @@ export async function FetchTeam() {
       },
     });
 
-    return { success: "Have team" };
+    if (data) {
+      return { success: true };
+    } else {
+      return { success: false };
+    }
   } catch (error) {
     return { error: error };
   }

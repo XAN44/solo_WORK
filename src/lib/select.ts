@@ -1,13 +1,14 @@
+import { UserRole } from "@prisma/client";
 import { Option } from "../components/ui/multipleSelect";
 
 export const SelectRole = [
   {
-    value: "Trainee",
-    role: "Trainee",
+    value: UserRole.Trainee,
+    role: UserRole.Trainee,
   },
   {
-    value: "Employe",
-    role: "Employe",
+    value: UserRole.Employe,
+    role: UserRole.Employe,
   },
 ];
 

@@ -27,7 +27,7 @@ import FormSuccess from "../ui/Form-success";
 import FormError from "../ui/Form-Error";
 import { Register_Action } from "../../../action/register";
 import { DepartMent, Jobs, SelectLevel, SelectRole } from "../../lib/select";
-import { UserLevel } from "@prisma/client";
+import { UserLevel, UserRole } from "@prisma/client";
 import { motion } from "framer-motion";
 
 interface Props {
@@ -53,7 +53,7 @@ const Form_Register: React.FC<Props> = ({
       last_name: "",
       password: "",
       confirmPassword: "",
-      role: "",
+      role: UserRole.Trainee,
       job: "",
       department: "",
       level: UserLevel.General,
