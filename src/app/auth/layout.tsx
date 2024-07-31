@@ -1,4 +1,4 @@
-export const maxDuration = 5; // This function can run for a maximum of 5 seconds
+export const maxDuration = 60; // This function can run for a maximum of 5 seconds
 
 import { Inter, Roboto } from "next/font/google";
 import { cn } from "../../lib/utils";

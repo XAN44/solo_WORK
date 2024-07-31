@@ -1,4 +1,4 @@
-export const maxDuration = 10; // This function can run for a maximum of 5 seconds
+export const maxDuration = 60; // This function can run for a maximum of 5 seconds
 
 import React from "react";
 import NewPasswordForm from "../../../components/auth/form_NewPassword";

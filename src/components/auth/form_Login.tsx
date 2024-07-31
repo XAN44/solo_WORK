@@ -1,6 +1,6 @@
 "use client";
 // TODO: Form Sign-in
-export const maxDuration = 10; // This function can run for a maximum of 5 seconds
+export const maxDuration = 60; // This function can run for a maximum of 5 seconds
 
 import React, { startTransition, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";

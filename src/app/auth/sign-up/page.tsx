@@ -1,5 +1,5 @@
 "use client";
-export const maxDuration = 10; // This function can run for a maximum of 5 seconds
+export const maxDuration = 60; // This function can run for a maximum of 5 seconds
 
 import { useState } from "react";
 import Cardwarpper from "../../../components/ui/cardwarpper/cardwarpper";
