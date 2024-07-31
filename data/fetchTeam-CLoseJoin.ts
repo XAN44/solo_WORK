@@ -9,6 +9,9 @@ export async function FetchTeam() {
     where: {
       userId: user?.user.id,
     },
+    select: {
+      id: true,
+    },
   });
 
   return checkTeam;
