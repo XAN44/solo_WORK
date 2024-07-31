@@ -1,3 +1,5 @@
+export const maxDuration = 5; // This function can run for a maximum of 5 seconds
+
 import { UserLevel } from "@prisma/client";
 import { useCurrentLevel } from "../../lib/auth";
 

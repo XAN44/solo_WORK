@@ -1,3 +1,5 @@
+export const maxDuration = 10; // This function can run for a maximum of 5 seconds
+
 import Image from "next/image";
 import React from "react";
 import NewVerificationForm from "../../../components/auth/new-verificationForm";

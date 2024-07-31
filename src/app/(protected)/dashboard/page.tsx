@@ -1,3 +1,5 @@
+export const maxDuration = 5; // This function can run for a maximum of 5 seconds
+
 import dynamic from "next/dynamic";
 import LevelGate from "../../auth/Level-Gate";
 import { UserLevel } from "@prisma/client";

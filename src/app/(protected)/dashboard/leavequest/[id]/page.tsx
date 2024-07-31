@@ -1,3 +1,5 @@
+export const maxDuration = 5; // This function can run for a maximum of 5 seconds
+
 import { redirect } from "next/navigation";
 import LeaverequestBySupervisor from "../../../../../components/ui/requestLeave/leaverequest";
 import { useCurrentLevel } from "../../../../../lib/auth";

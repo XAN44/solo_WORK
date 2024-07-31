@@ -1,3 +1,5 @@
+export const maxDuration = 10; // This function can run for a maximum of 5 seconds
+
 import React from "react";
 import ResetForm from "../../../components/auth/form_Reset";
 import Cardwarpper from "../../../components/ui/cardwarpper/cardwarpper";

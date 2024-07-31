@@ -1,3 +1,5 @@
+export const maxDuration = 5; // This function can run for a maximum of 5 seconds
+
 import { auth } from "../../../../../../auth";
 import { getMemberById } from "../../../../../../data/user";
 import StartWork from "../../../../../components/ui/profile/startWork";

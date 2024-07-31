@@ -1,4 +1,6 @@
 "use client";
+export const maxDuration = 10; // This function can run for a maximum of 5 seconds
+
 import React, { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

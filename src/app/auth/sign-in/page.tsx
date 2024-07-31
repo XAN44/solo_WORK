@@ -1,18 +1,17 @@
-import dynamic from "next/dynamic";
+"use client";
+export const maxDuration = 10; // This function can run for a maximum of 5 seconds
+
+import React from "react";
+import { Button } from "../../../components/ui/button";
 import Cardwarpper from "../../../components/ui/cardwarpper/cardwarpper";
+import Form_LOGIN from "../../../components/auth/form_Login";
 
-const Form_LOGIN = dynamic(
-  () => import("../../../components/auth/form_Login"),
-  {
-    ssr: false, // โหลดเฉพาะบน client-side
-  },
-);
-
-export default function Page() {
+export default function page() {
   return (
+    // *ปรับแต่งหัวข้อได้ในหน้านี้ หรือหากต้องการอยากจะแก้ไขตัว UI ทั้งหมด Ctrl + Click ไปที่ Cardwarpper
     <Cardwarpper
-      bar_content="if you don't have an account "
-      bar_title="Sign-In"
+      bar_content="if you don't have account "
+      bar_title="Sign-In "
       bar_sub="REGISTER"
       href="/auth/sign-up"
       color=""

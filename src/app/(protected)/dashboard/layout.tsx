@@ -1,3 +1,5 @@
+export const maxDuration = 5; // This function can run for a maximum of 5 seconds
+
 import { Inter, Roboto_Mono } from "next/font/google";
 import { currentUser } from "../../../lib/auth";
 import { getUserByIdBackUp } from "../../../../data/user";
@@ -17,7 +19,6 @@ const inter = Roboto_Mono({
   weight: "variable",
   subsets: ["vietnamese"],
 });
-export const maxDuration = 20;
 
 export default async function Protect_Layout({
   children,
