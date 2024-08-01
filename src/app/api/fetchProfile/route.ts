@@ -25,7 +25,7 @@ export async function GET(req: Request, res: Response) {
       },
     });
 
-    return NextResponse.json({ user });
+    return NextResponse.json(user);
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch team" },

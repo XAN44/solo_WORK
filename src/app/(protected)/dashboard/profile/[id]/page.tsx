@@ -11,10 +11,16 @@ import { UseCurrentUser } from "../../../../../../hooks/use-curret-user";
 
 export default function Page({ params }: { params: { id: string } }) {
   // ดึงข้อมูลผู้ใช้ที่เป็นหน้าโปรไฟล์
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["Profile", params.id],
     queryFn: () => fetchMemberId(params.id),
   });
+
+  if (error) {
+    return <>{error}</>;
+  }
+
   const current = UseCurrentUser();
   if (isLoading) {
     return (
@@ -32,7 +38,9 @@ export default function Page({ params }: { params: { id: string } }) {
 
   const isAdmin = current.level === "Admin";
   const isSupervisorOfMember = data?.user?.user?.supervisorId === current.id;
-  const isProfileOwner = current.id === data?.user?.userId;
+  const isProfileOwner = current.id === data?.userId;
+
+  console.log(isProfileOwner);
 
   // ตรวจสอบสิทธิ์การเข้าถึง
   if (!isAdmin && !isSupervisorOfMember && !isProfileOwner) {
@@ -54,9 +62,9 @@ export default function Page({ params }: { params: { id: string } }) {
         )}
         <div className="ml-6">
           <div className="mb-6">
-            <AllWork id={data.id || ""} />
+            <AllWork id={data.id} />
           </div>
-          <AllAttendance id={data.id || ""} />
+          <AllAttendance id={data.id} />
         </div>
       </div>
     </div>

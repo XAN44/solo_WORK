@@ -46,7 +46,7 @@ function Page() {
     );
   }
 
-  const hasTeam = teamResponse && teamResponse;
+  const hasTeam = teamResponse && teamResponse.id;
   const isAdmin = user?.level === UserLevel.Admin; // ตรวจสอบว่าเป็นแอดมินหรือไม่
 
   return (
@@ -58,7 +58,7 @@ function Page() {
 
         {hasTeam || isAdmin ? <Attendence /> : null}
 
-        {hasTeam ? <YourProfile id={teamResponse?.id || ""} /> : null}
+        {hasTeam ? <YourProfile id={teamResponse.id} /> : null}
 
         <LevelGate allowedLevel={UserLevel.Admin}>
           <ConfigSalary />
