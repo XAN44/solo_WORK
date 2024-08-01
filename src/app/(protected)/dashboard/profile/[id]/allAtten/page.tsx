@@ -16,10 +16,7 @@ import { FetchAllAtten } from "../../../../../../../data/fetch-taskAndAtten";
 import ActionBtn_TimeOut from "../../../../../../components/ui/profile/actionSignOutBtn";
 import AttenSumary from "../../../../../../components/ui/allTask/attenTask";
 import { useQuery } from "@tanstack/react-query";
-import {
-  fetchAtten,
-  fetchTasks,
-} from "../../../../../../../actionAPi/fetchTeam";
+import { fetchAtten, fetchTasks } from "../../../../../../../actionAPi/fetch";
 import { ClipLoader } from "react-spinners";
 
 export default function Page({ params }: { params: { id: string } }) {

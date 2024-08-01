@@ -1,28 +1,38 @@
+"use client";
 import { auth } from "../../../../../../auth";
-import { getMemberById } from "../../../../../../data/user";
 import StartWork from "../../../../../components/ui/profile/startWork";
 import LeaveRequest from "../../../../../components/ui/profile/leaveRequest";
 import AllWork from "../../../../../components/ui/profile/AllWork";
 import AllAttendance from "../../../../../components/ui/profile/AllAttendance";
-import { Button } from "../../../../../components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { fetchMemberId } from "../../../../../../actionAPi/fetch";
+import { ClipLoader } from "react-spinners";
+import { UseCurrentUser } from "../../../../../../hooks/use-curret-user";
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default function Page({ params }: { params: { id: string } }) {
   // ดึงข้อมูลผู้ใช้ที่เป็นหน้าโปรไฟล์
-  const member = await getMemberById(params.id);
-  if (!member) {
-    return <div>Member not found</div>;
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["Profile", params.id],
+    queryFn: () => fetchMemberId(params.id),
+  });
+  const current = UseCurrentUser();
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <ClipLoader />
+      </div>
+    );
   }
 
   // ดึงข้อมูลผู้ใช้ที่เข้าสู่ระบบ
-  const current = await auth();
-  if (!current?.user) {
+  if (!current) {
     return <div>Unauthorized</div>;
   }
+  console.log("Data from API:", data);
 
-  // ตรวจสอบบทบาทของผู้ใช้ที่เข้าสู่ระบบ
-  const isAdmin = current.user.level === "Admin"; // ตรวจสอบว่าเป็นแอดมิน
-  const isSupervisorOfMember = member.user?.supervisorId === current.user.id; // ตรวจสอบว่าผู้ใช้เป็นหัวหน้างานของสมาชิก
-  const isProfileOwner = current.user.id === member.userId; // ตรวจสอบว่าเป็นเจ้าของโปรไฟล์
+  const isAdmin = current.level === "Admin";
+  const isSupervisorOfMember = data?.user?.user?.supervisorId === current.id;
+  const isProfileOwner = current.id === data?.user?.userId;
 
   // ตรวจสอบสิทธิ์การเข้าถึง
   if (!isAdmin && !isSupervisorOfMember && !isProfileOwner) {
@@ -44,9 +54,9 @@ export default async function Page({ params }: { params: { id: string } }) {
         )}
         <div className="ml-6">
           <div className="mb-6">
-            <AllWork id={member.id || ""} />
+            <AllWork id={data.id || ""} />
           </div>
-          <AllAttendance id={member.id || ""} />
+          <AllAttendance id={data.id || ""} />
         </div>
       </div>
     </div>

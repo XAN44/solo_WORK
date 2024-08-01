@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FetchTeam } from "../../../../../data/fetch-team";
 
 import TabelTeam from "../../../../components/ui/myteam/tabelTeam";
-import { fetchTeams } from "../../../../../actionAPi/fetchTeam";
+import { fetchTeams } from "../../../../../actionAPi/fetch";
 import { Skeleton } from "../../../../components/ui/skeleton";
 import { ClipLoader } from "react-spinners";
 

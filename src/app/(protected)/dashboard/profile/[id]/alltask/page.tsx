@@ -3,7 +3,7 @@ import React from "react";
 
 import SumaryTask from "../../../../../../components/ui/allTask/sumaryTask";
 import { useQuery } from "@tanstack/react-query";
-import { fetchTasks } from "../../../../../../../actionAPi/fetchTeam";
+import { fetchTasks } from "../../../../../../../actionAPi/fetch";
 import { ClipLoader } from "react-spinners";
 
 export default function Page({ params }: { params: { id: string } }) {

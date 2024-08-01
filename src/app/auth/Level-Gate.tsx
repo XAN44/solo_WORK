@@ -1,15 +1,15 @@
 export const maxDuration = 60; // This function can run for a maximum of 5 seconds
 
 import { UserLevel } from "@prisma/client";
-import { useCurrentLevel } from "../../lib/auth";
+import { useCurrentLevel } from "../../../hooks/use-curret-user";
 
 interface Level {
   children: React.ReactNode;
   allowedLevel: UserLevel;
 }
 
-async function LevelGate({ children, allowedLevel }: Level) {
-  const user = await useCurrentLevel();
+function LevelGate({ children, allowedLevel }: Level) {
+  const user = useCurrentLevel();
 
   if (user !== allowedLevel) {
     return <> </>;

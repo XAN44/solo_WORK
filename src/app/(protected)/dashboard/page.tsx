@@ -1,32 +1,52 @@
+"use client";
 export const maxDuration = 60; // This function can run for a maximum of 5 seconds
 
 import dynamic from "next/dynamic";
 import LevelGate from "../../auth/Level-Gate";
 import { UserLevel } from "@prisma/client";
-import { FetchTeam } from "../../../../data/fetchTeam-CLoseJoin";
-import { getProfileTeamById } from "../../../../data/user";
-import { currentUser } from "../../../lib/auth";
+import { useQuery } from "@tanstack/react-query";
+import { FetchTeam, getProfileTeamById } from "../../../../actionAPi/fetch";
+import { UseCurrentUser } from "../../../../hooks/use-curret-user";
+import { ClipLoader } from "react-spinners";
+import { preload } from "react-dom";
 
-const Admin = dynamic(() => import("../../../components/ui/dashboard/admin"));
+const Admin = dynamic(() => import("../../../components/ui/dashboard/admin"), {
+  ssr: false,
+});
 const Attendence = dynamic(
   () => import("../../../components/ui/dashboard/attendence"),
+  { ssr: false },
 );
 const YourProfile = dynamic(
   () => import("../../../components/ui/dashboard/Profile"),
+  { ssr: false },
 );
 const ConfigSalary = dynamic(
   () => import("../../../components/ui/dashboard/configSalary"),
+  { ssr: false },
 );
 const JoinTeam = dynamic(
   () => import("../../../components/ui/dashboard/joinTeam"),
+  { ssr: false },
 );
 
-async function Page() {
-  const user = await currentUser();
-  const data = await getProfileTeamById(user?.id || "");
-  const teamResponse = await FetchTeam();
+function Page() {
+  const user = UseCurrentUser();
 
-  const hasTeam = teamResponse && teamResponse.success;
+  const { data: teamResponse, isLoading } = useQuery({
+    queryKey: ["teamResponse"],
+    queryFn: FetchTeam,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <ClipLoader />
+      </div>
+    );
+  }
+
+  const hasTeam = teamResponse && teamResponse;
   const isAdmin = user?.level === UserLevel.Admin; // ตรวจสอบว่าเป็นแอดมินหรือไม่
 
   return (
@@ -38,7 +58,7 @@ async function Page() {
 
         {hasTeam || isAdmin ? <Attendence /> : null}
 
-        {data?.id ? <YourProfile id={data?.id || ""} /> : null}
+        {hasTeam ? <YourProfile id={teamResponse?.id || ""} /> : null}
 
         <LevelGate allowedLevel={UserLevel.Admin}>
           <ConfigSalary />

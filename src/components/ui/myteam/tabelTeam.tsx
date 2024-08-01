@@ -14,7 +14,7 @@ import { TeamFull } from "../../../types/modal";
 import DetalTabel from "./detalTabel";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { fetchTeams } from "../../../../actionAPi/fetchTeam";
+import { fetchTeams } from "../../../../actionAPi/fetch";
 interface Team {
   teams: TeamFull[];
 }
