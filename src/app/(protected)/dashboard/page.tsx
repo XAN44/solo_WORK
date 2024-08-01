@@ -9,26 +9,11 @@ import { FetchTeam, getProfileTeamById } from "../../../../actionAPi/fetch";
 import { UseCurrentUser } from "../../../../hooks/use-curret-user";
 import { ClipLoader } from "react-spinners";
 import { preload } from "react-dom";
-
-const Admin = dynamic(() => import("../../../components/ui/dashboard/admin"), {
-  ssr: false,
-});
-const Attendence = dynamic(
-  () => import("../../../components/ui/dashboard/attendence"),
-  { ssr: false },
-);
-const YourProfile = dynamic(
-  () => import("../../../components/ui/dashboard/Profile"),
-  { ssr: false },
-);
-const ConfigSalary = dynamic(
-  () => import("../../../components/ui/dashboard/configSalary"),
-  { ssr: false },
-);
-const JoinTeam = dynamic(
-  () => import("../../../components/ui/dashboard/joinTeam"),
-  { ssr: false },
-);
+import Admin from "../../../components/ui/dashboard/admin";
+import Attendence from "../../../components/ui/dashboard/attendence";
+import YourProfile from "../../../components/ui/dashboard/Profile";
+import ConfigSalary from "../../../components/ui/dashboard/configSalary";
+import JoinTeam from "../../../components/ui/dashboard/joinTeam";
 
 function Page() {
   const user = UseCurrentUser();

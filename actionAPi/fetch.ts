@@ -40,20 +40,16 @@ export const fetchMemberId = async (id: string) => {
   return response.json();
 };
 
-export const FetchTeam = async () => {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/FetchTeam`,
-    );
-    if (!response.ok) {
-      throw new Error(`Network response was not ok: ${response.statusText}`);
-    }
-    return response.json();
-  } catch (error) {
-    console.error("FetchTeam error:", error);
-    throw error; // Rethrow the error for React Query to handle
+export async function FetchTeam() {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/fetchDash`,
+  );
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
   }
-};
+  return response.json();
+}
+
 export const getProfileTeamById = async (userId: string) => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/getProfileTeamById?id=${userId}`, // ลบปีกกาออกจาก URL
