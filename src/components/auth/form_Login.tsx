@@ -27,10 +27,12 @@ import { motion } from "framer-motion";
 import { MdError } from "react-icons/md";
 import { GiConfirmed } from "react-icons/gi";
 import { ClipLoader } from "react-spinners";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Form_LOGIN() {
   const [isPending, startTranstion] = useTransition();
-
+  const router = useRouter();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
@@ -47,40 +49,19 @@ export default function Form_LOGIN() {
   } = form;
 
   const [buttonText, setButtonText] = useState("Sign-In");
-  const onSubmit = (value: z.infer<typeof SignInSchema>) => {
-    startTranstion(() => {
-      LoginAction(value).then((data) => {
-        const isError = !!data?.error;
-        toast.custom(
-          (t) => (
-            <AnimatePresence>
-              <motion.div
-                key=""
-                layout
-                initial={{ opacity: 0, scale: 1 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 100, scale: 1 }}
-                className={`flex items-center justify-center rounded-md ${isError ? "bg-destructive" : "bg-emerald-700"} px-6 py-4 text-white shadow-md ${t.visible ? "animate-in" : "animate-out"} `}
-              >
-                {isError ? (
-                  <>
-                    {data.error}
-                    <MdError className="h-6 w-6 text-white" />
-                  </>
-                ) : (
-                  <>
-                    {data?.success}
-                    <GiConfirmed className="h-6 w-6" />
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          ),
-          {
-            duration: 4000,
-          },
-        );
+  const onSubmit = async (value: z.infer<typeof SignInSchema>) => {
+    startTranstion(async () => {
+      const result = await signIn("credentials", {
+        redirect: false,
+        username: value.username,
+        password: value.password,
       });
+
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        router.push("/dashboard");
+      }
     });
   };
   return (

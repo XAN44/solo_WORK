@@ -40,7 +40,7 @@ export default function ActionBtn({ id }: Model) {
             </div>
           </Link>
           <Link
-            href={`/dashboard/profile/${id}/alltask`}
+            href={`/dashboard/profile/${id}/allAtten`}
             className="text-blue-600 hover:underline"
           >
             <div className="flex items-center justify-center space-x-2">
