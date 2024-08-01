@@ -14,12 +14,6 @@ export async function FetchAllTaskAndAtten(teamMemberId: string) {
           startAt: "asc",
         },
       },
-      attendance: {
-        // Assuming that you have a relation called attendance
-        orderBy: {
-          dateIn: "asc",
-        },
-      },
     },
   });
 
@@ -78,6 +72,5 @@ export async function FetchAllAtten(id: string) {
     },
   });
 
-  console.log(Atten);
   return Atten;
 }

@@ -1,6 +1,5 @@
 "use client";
 import { format } from "date-fns";
-import { FetchTeam } from "../../../../data/fetch-team";
 import {
   Table,
   TableBody,
@@ -14,6 +13,8 @@ import { useState } from "react";
 import { TeamFull } from "../../../types/modal";
 import DetalTabel from "./detalTabel";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTeams } from "../../../../actionAPi/fetchTeam";
 interface Team {
   teams: TeamFull[];
 }
@@ -21,6 +22,7 @@ interface Team {
 export default function TabelTeam({ teams }: Team) {
   const [popupData, setPopupdata] = useState<TeamFull | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+
   const handleOpen = (data: TeamFull) => {
     setIsOpen(true);
     setPopupdata(data);
