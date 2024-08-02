@@ -100,14 +100,15 @@ export const StartLeaveRequestAtion = async (
       typeLeave,
       tel,
       reason,
-      dateIn,
-      dateOut,
+      // dateIn,
+      // dateOut,
       create.statusLeave || "",
       leaveDuration,
     );
   }
 
   return {
-    success: `The system will send an email to ${isAdmin?.admin?.email} "the appropriate recipient"}`,
+    success: `Request created successfully
+`,
   };
 };

@@ -22,19 +22,19 @@ export const sendWithLeaveRequest = async (
   typeleave: string,
   tel: string,
   reason: string,
-  leaveDateStart: Date,
-  leaveDateEnd: Date,
+  // leaveDateStart: Date,
+  // leaveDateEnd: Date,
   statusLeave: string,
   leaveDuration: number,
 ) => {
   const now = new Date();
   const confirmLink = `${process.env.NEXT_PUBLIC_API_URL}/dashboard/leavequest/${id}`;
-  const formatStartAt = format(leaveDateStart, "dd MMMM yyyy 'at' hh:mm a", {
-    locale: th,
-  });
-  const formatEndAt = format(leaveDateEnd, "dd MMMM yyyy 'at' hh:mm a", {
-    locale: th,
-  });
+  // const formatStartAt = format(leaveDateStart, "dd MMMM yyyy 'at' hh:mm a", {
+  //   locale: th,
+  // });
+  // const formatEndAt = format(leaveDateEnd, "dd MMMM yyyy 'at' hh:mm a", {
+  //   locale: th,
+  // });
 
   // แปลค่า createAt เป็นข้อความ
 
@@ -55,9 +55,7 @@ export const sendWithLeaveRequest = async (
 
         <p style="color: #4b5563; margin-bottom: 15px;">
           ประเภทของการลางาน: <strong>${typeleave}</strong><br/>
-          เริ่มลาเมื่อวันที่: <strong>${formatStartAt}</strong><br/>
-          ระยะเวลาสิ้นสุด: <strong>${formatEndAt}</strong> <br/>
-          ระยะเวลาทั้งสิ้น: <strong> ${leaveDuration} </strong>  <br/>
+        
           ช่องทางติดต่อ: <strong>${tel}</strong>
 
         </p>
