@@ -183,26 +183,6 @@ export async function UpdateStatusTask(
       },
     });
 
-    const lastData = await db.task.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        status: true,
-      },
-    });
-
-    if (lastData) {
-      await sendWithApproveTask(
-        task.teamMember?.user?.last_name || "",
-        task.teamMember?.user?.first_name || "",
-        task.teamMember?.user?.last_name || "",
-        task.title,
-        task.description,
-        lastData?.status,
-      );
-    }
-
     revalidatePath("/");
     return { success: "Success" };
   } catch (error) {
