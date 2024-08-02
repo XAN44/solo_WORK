@@ -26,6 +26,7 @@ export async function createAttendence(teamMemberId: string, dateIn: Date) {
     setMinutes(setSeconds(setMilliseconds(today, 0), 0), 0),
     9,
   );
+
   // TODO ถ้าลงชื่อหลังจาก 9:00 ถือว่ามาสาย
   const type = dateIn > nineAm ? Attendance.Late : Attendance.Present;
 
@@ -51,7 +52,7 @@ export async function createAttendence(teamMemberId: string, dateIn: Date) {
       userData?.first_name || "",
       userData?.last_name || "",
       userData?.department || "",
-      dateIn,
+      // dateIn,
     );
   }
 

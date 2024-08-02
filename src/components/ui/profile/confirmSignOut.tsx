@@ -19,7 +19,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="modal modal-open">
-        <div className="modal-box">
+        <div className="modal-box bg-white">
           <h2 className="text-lg font-bold"> Confirm sign out</h2>
           <p className="mt-4">
             Are you sure you want to sign out? If you do not complete 4 hours of

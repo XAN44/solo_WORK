@@ -136,8 +136,7 @@ export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
     dataUser.last_name || "Unknown",
     dataUser.department || "Unknown",
     team?.project || "Unknown",
-    startAt,
-    endAt,
+
     taskToday.map((task) => ({ title: task.title, status: task.status })),
     updateData.type || "Checked Out",
   );

@@ -1,5 +1,7 @@
 "use client";
 // TODO: Form Sign-in
+export const maxDuration = 60; // This function can run for a maximum of 5 seconds
+
 import React, { startTransition, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,46 +49,21 @@ export default function Form_LOGIN() {
   } = form;
 
   const [buttonText, setButtonText] = useState("Sign-In");
-  const onSubmit = (value: z.infer<typeof SignInSchema>) => {
-    startTransition(() => {
-      LoginAction(value).then((data) => {
-        const isError = !!data?.error;
-        toast.custom(
-          (t) => (
-            <AnimatePresence>
-              <motion.div
-                key=""
-                layout
-                initial={{ opacity: 0, scale: 1 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 100, scale: 1 }}
-                className={`flex items-center justify-center rounded-md ${isError ? "bg-destructive" : "bg-emerald-700"} px-6 py-4 text-white shadow-md ${t.visible ? "animate-in" : "animate-out"} `}
-              >
-                {isError ? (
-                  <>
-                    {data.error}
-                    <MdError className="h-6 w-6 text-white" />
-                  </>
-                ) : (
-                  <>
-                    {data?.success}
-                    <GiConfirmed className="h-6 w-6" />
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          ),
-          {
-            duration: 4000,
-          },
-        );
-        if (data.success) {
-          router.prefetch("/dashboard");
-        }
+  const onSubmit = async (value: z.infer<typeof SignInSchema>) => {
+    startTranstion(async () => {
+      const result = await signIn("credentials", {
+        redirect: false,
+        username: value.username,
+        password: value.password,
       });
+
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        router.push("/dashboard");
+      }
     });
   };
-
   return (
     <div className="h-full w-full">
       <div className="flex h-full w-full flex-col items-center justify-center">

@@ -72,8 +72,8 @@ export async function createAttendenceBackDated(
       userData?.last_name || "",
       userData?.department || "",
       teamData?.project || "",
-      dateIn,
-      dateOut || null, // ใช้ null ถ้า dateOut ไม่มีค่า
+      // dateIn,
+      // dateOut || null, // ใช้ null ถ้า dateOut ไม่มีค่า
       attendanceType,
     );
   }
