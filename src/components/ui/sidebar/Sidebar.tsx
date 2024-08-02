@@ -1,10 +1,9 @@
 import Sidebar_Body from "./components/Sidebar_Body";
 import { ExtendendUser } from "../../../app/types/next-auth";
-import { User } from "../../../types/modalSumary";
 
 interface Props {
   children: React.ReactNode;
-  user: User;
+  user?: ExtendendUser;
 }
 
 export default function Sidebar({ children, user }: Props) {

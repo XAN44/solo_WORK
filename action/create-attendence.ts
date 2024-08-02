@@ -3,6 +3,7 @@
 import { Attendance } from "@prisma/client";
 import { db } from "../src/lib/db";
 import {
+  format,
   isBefore,
   setHours,
   setMilliseconds,
@@ -15,6 +16,7 @@ import { auth } from "../auth";
 import { getUserById } from "../data/user";
 import { GetSupervisorById } from "../data/supervisor";
 import { sendMailWithTimeInSupervisor } from "../src/lib/sendMail_SupervisorTimeIn";
+import { enUS } from "date-fns/locale";
 
 export async function createAttendence(teamMemberId: string, dateIn: Date) {
   const user = await auth();
@@ -49,7 +51,6 @@ export async function createAttendence(teamMemberId: string, dateIn: Date) {
       userData?.first_name || "",
       userData?.last_name || "",
       userData?.department || "",
-      teamData?.project || "",
       dateIn,
     );
   }

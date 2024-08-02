@@ -18,7 +18,6 @@ export const sendMailWithTimeIn = async (
   name: string,
   last: string,
   department: string,
-  project: string,
   startAt: Date | null,
 ) => {
   const now = new Date();

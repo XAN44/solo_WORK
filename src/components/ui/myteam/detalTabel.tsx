@@ -104,10 +104,7 @@ export default function DetalTabel({ isOpen, onClose, teams }: Data) {
                             ? getUniqueDays(member.attendance).map((att, j) => (
                                 <div key={j}>
                                   {att.dateIn
-                                    ? format(
-                                        new Date(att.dateIn),
-                                        "eeee 'at' h:mm",
-                                      )
+                                    ? format(new Date(att.dateIn), "HH:mm a")
                                     : "No Time In"}
                                 </div>
                               ))
@@ -118,10 +115,7 @@ export default function DetalTabel({ isOpen, onClose, teams }: Data) {
                             ? getUniqueDays(member.attendance).map((att, j) => (
                                 <div key={j}>
                                   {att.dateOut
-                                    ? format(
-                                        new Date(att.dateOut),
-                                        "eeee 'at' h:mm",
-                                      )
+                                    ? format(new Date(att.dateOut), "HH:mm a")
                                     : "No Time Out"}
                                 </div>
                               ))

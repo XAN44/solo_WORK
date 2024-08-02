@@ -1,4 +1,4 @@
-export const maxDuration = 60; // This function can run for a maximum of 5 seconds
+import { signOut } from "next-auth/react";
 
 import { Inter, Roboto_Mono } from "next/font/google";
 import { currentUser } from "../../../lib/auth";
@@ -7,14 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { User } from "../../../types/modalSumary";
 import { auth } from "../../../../auth";
 import dynamic from "next/dynamic";
-import Btn_signOut from "../../../components/auth/btn_signOut";
-
-const Sidebar = dynamic(
-  () => import("../../../components/ui/sidebar/Sidebar"),
-  {
-    ssr: false, // Optionally disable server-side rendering for this component
-  },
-);
+import Btn_signOut from "../../../components/auth/btnClinent_SignOut";
+import Sidebar from "../../../components/ui/sidebar/Sidebar";
 
 const inter = Roboto_Mono({
   weight: "variable",
@@ -26,22 +20,10 @@ export default async function Protect_Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await auth();
-  if (!user?.user.id) {
-    return null;
-  }
-  const { error, success } = await getUserByIdBackUp(user.user.id || "");
-  if (error || !success) {
-    // ถ้าหากเกิดข้อผิดพลาด หรือไม่มีข้อมูลผู้ใช้
-    return (
-      <div className="skeleton fixed left-2 top-2 h-11 w-11 rounded-full">
-        <Btn_signOut />
-      </div>
-    );
-  }
+  const user = await currentUser();
 
   return (
-    <Sidebar user={success}>
+    <Sidebar user={user!}>
       <div className={inter.className}>{children}</div>
     </Sidebar>
   );

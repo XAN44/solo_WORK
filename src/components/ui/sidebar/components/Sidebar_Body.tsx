@@ -1,15 +1,12 @@
 "use client";
-import { Input } from "../../input";
-import { FaCircleUser } from "react-icons/fa6";
-import { Button } from "../../button";
-import { ExtendendUser } from "../../../../app/types/next-auth";
 import UserInfo from "./userInfo";
 import Btn_signOut from "../../../auth/btn_signOut";
 import { useState } from "react";
-import { User } from "../../../../types/modalSumary";
+import { ExtendendUser } from "../../../../app/types/next-auth";
+import { FaCircleUser } from "react-icons/fa6";
 
 interface Props {
-  user: User;
+  user?: ExtendendUser;
 }
 
 export default function Sidebar_Body({ user }: Props) {
