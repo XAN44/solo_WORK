@@ -74,5 +74,6 @@ export async function FetchAllAtten(id: string) {
     },
   });
 
+  revalidatePath("/");
   return Atten;
 }

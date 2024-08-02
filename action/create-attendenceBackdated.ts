@@ -5,18 +5,16 @@ import { db } from "../src/lib/db";
 import {
   isBefore,
   setHours,
-  setMilliseconds,
   setMinutes,
   setSeconds,
+  setMilliseconds,
   startOfDay,
 } from "date-fns";
-import { sendMailWithTimeIn } from "../src/lib/sendMail_TimeIn";
-import { GetAdminByTeamId, GetSupervisorById } from "../data/supervisor";
+import { sendMailWithTimeInSupervisor } from "../src/lib/sendMail_SupervisorTimeIn";
 import { auth } from "../auth";
 import { getUserById } from "../data/user";
 import { GetAdminInTeam, GetTeamById } from "../data/team";
-import { SiCucumber } from "react-icons/si";
-import { sendMailWithTimeInSupervisor } from "../src/lib/sendMail_SupervisorTimeIn";
+import { GetSupervisorById } from "../data/supervisor";
 
 export async function createAttendenceBackDated(
   teamMemberId: string,
@@ -26,18 +24,21 @@ export async function createAttendenceBackDated(
   const user = await auth();
   const today = new Date();
 
+  // กำหนดเวลา 9:00 AM
   const nineAm = setHours(
     setMinutes(setSeconds(setMilliseconds(today, 0), 0), 0),
     9,
   );
-  // TODO ถ้าลงชื่อหลังจาก 9:00 ถือว่ามาสาย
-  const type = dateIn > nineAm ? Attendance.Late : Attendance.Present;
 
-  // TODO ถ้าลงชื่อเป็นเวลาก่อนหน้าวันนี้ จะเท่ากับลงชื่อย้อนหลัง
+  // ประเภทการเข้าทำงาน
+  const type = isBefore(dateIn, nineAm) ? Attendance.Late : Attendance.Present;
+
+  // ประเภทการลงชื่อย้อนหลัง
   const attendanceType = isBefore(dateIn, startOfDay(today))
     ? Attendance.Backdate
     : type;
 
+  // สร้างข้อมูลการเข้าทำงาน
   if (dateOut && isBefore(dateIn, startOfDay(today))) {
     await db.attendance.create({
       data: {
@@ -49,11 +50,19 @@ export async function createAttendenceBackDated(
     });
   }
 
-  const userData = await getUserById(user?.user.id || "");
-  const teamData = await GetTeamById(user?.user.id || "");
-  const adminEmail = await GetAdminInTeam(user?.user.id || "");
-  const dateOutOrNull = dateOut ?? null;
+  // ดึงข้อมูลผู้ใช้, ทีม, ซูเปอร์ไวเซอร์, และแอดมินพร้อมกัน
+  const [userData, teamData, , adminEmail] = await Promise.all([
+    getUserById(user?.user.id || ""),
+    GetTeamById(user?.user.id || ""),
+    db.teamMember.findUnique({
+      where: { id: teamMemberId },
+      select: { isSupervisor: true },
+    }),
+    GetAdminInTeam(user?.user.id || ""),
+    GetSupervisorById(user?.user.id || ""),
+  ]);
 
+  // ส่งอีเมล
   if (adminEmail) {
     await sendMailWithTimeInSupervisor(
       adminEmail,
@@ -64,7 +73,7 @@ export async function createAttendenceBackDated(
       userData?.department || "",
       teamData?.project || "",
       dateIn,
-      dateOutOrNull,
+      dateOut || null, // ใช้ null ถ้า dateOut ไม่มีค่า
       attendanceType,
     );
   }

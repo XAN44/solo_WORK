@@ -37,20 +37,22 @@ export async function UpdateStatusTask(
       return { error: "Task not found" };
     }
 
-    const isAdmin = await db.team.findFirst({
-      where: {
-        id: task.teamMember?.team?.id,
-        adminId: userId,
-      },
-      select: {
-        admin: true,
-      },
-    });
+    const [isAdmin, settings] = await Promise.all([
+      db.team.findFirst({
+        where: {
+          id: task.teamMember?.team?.id,
+          adminId: userId,
+        },
+        select: { admin: true },
+      }),
+      db.accumulationSettings.findFirst({
+        where: { typeOfWork: task.typeOfWork },
+      }),
+    ]);
 
     const isSupervisor = user?.user.level === "Supervisor";
-    const previousStatus = task.status;
 
-    if (task.teamMember?.id !== userId && !isAdmin && !isSupervisor) {
+    if (task.teamMember?.userId !== userId && !isAdmin && !isSupervisor) {
       return { error: "You are not authorized to update this task" };
     }
 
@@ -64,10 +66,6 @@ export async function UpdateStatusTask(
       if (isSupervisor && task.teamMember?.userId === userId) {
         return { error: "Supervisor cannot approve their own task" };
       }
-
-      const settings = await db.accumulationSettings.findFirst({
-        where: { typeOfWork: task.typeOfWork },
-      });
 
       if (!settings) {
         return { error: "No salary settings found for this type of work" };
@@ -110,19 +108,20 @@ export async function UpdateStatusTask(
       data: { status },
     });
 
-    // Fetch accumulated amount after task update
     const accumulatedAmount = await db.accumulatedAmount.findFirst({
       where: { teamMemberId: task.teamMemberId || "" },
     });
 
-    await sendWithApproveTask(
-      task.teamMember?.user?.last_name || "",
-      task.teamMember?.user?.first_name || "",
-      task.teamMember?.user?.last_name || "",
-      task.title,
-      task.description,
-      previousStatus,
-    );
+    if (status === StatusTask.Completed || status === StatusTask.Cancelled) {
+      await sendWithApproveTask(
+        task.teamMember?.user?.email || "",
+        task.teamMember?.user?.first_name || "",
+        task.teamMember?.user?.last_name || "",
+        task.title,
+        task.description,
+        status,
+      );
+    }
 
     revalidatePath("/profile");
     return { success: "Success", accumulatedAmount };

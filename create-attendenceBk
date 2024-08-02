@@ -8,12 +8,14 @@ import {
   setMilliseconds,
   setMinutes,
   setSeconds,
+  startOfDay,
 } from "date-fns";
 import { sendMailWithTimeIn } from "../src/lib/sendMail_TimeIn";
-import { GetAdminInTeam, GetTeamById } from "../data/team";
+import { GetAdminByTeamId, GetSupervisorById } from "../data/supervisor";
 import { auth } from "../auth";
 import { getUserById } from "../data/user";
-import { GetSupervisorById } from "../data/supervisor";
+import { GetAdminInTeam, GetTeamById } from "../data/team";
+import { SiCucumber } from "react-icons/si";
 import { sendMailWithTimeInSupervisor } from "../src/lib/sendMail_SupervisorTimeIn";
 
 export async function createAttendence(teamMemberId: string, dateIn: Date) {
@@ -34,16 +36,24 @@ export async function createAttendence(teamMemberId: string, dateIn: Date) {
       type,
     },
   });
-  const [userData, teamData, adminEmail] = await Promise.all([
-    getUserById(user?.user.id || ""),
-    GetTeamById(user?.user.id || ""),
-    GetAdminInTeam(user?.user.id || ""),
-  ]);
 
-  // ส่งอีเมลไปยังแอดมิน
-  if (adminEmail) {
+  const isSupervisor = await db.teamMember.findFirst({
+    where: {
+      userId: teamMemberId,
+    },
+    select: {
+      isSupervisor: true,
+    },
+  });
+
+  const userData = await getUserById(user?.user.id || "");
+  const teamData = await GetTeamById(user?.user.id || "");
+  const supervisorEmail = await GetSupervisorById(user?.user.id || "");
+  const adminEmail = await GetAdminInTeam(user?.user.id || "");
+
+  if (!isSupervisor?.isSupervisor && adminEmail) {
     await sendMailWithTimeIn(
-      adminEmail,
+      supervisorEmail?.email || "",
       userData?.role || "",
       userData?.job || "",
       userData?.first_name || "",

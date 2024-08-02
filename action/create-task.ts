@@ -1,28 +1,10 @@
 "use server";
 import { z } from "zod";
 import { StartWorkSchema } from "../schema/validateStartWork";
-import {
-  endOfDay,
-  format,
-  getDay,
-  getHours,
-  isAfter,
-  isBefore,
-  isToday,
-  setHours,
-  setMinutes,
-  startOfDay,
-} from "date-fns";
+import { startOfDay, isAfter, isBefore } from "date-fns";
 import { db } from "../src/lib/db";
-import { Attendance, CreateAt, StatusTask } from "@prisma/client";
+import { CreateAt, StatusTask } from "@prisma/client";
 import { auth } from "../auth";
-import { GetAdminByTeamId, GetSupervisorById } from "../data/supervisor";
-
-import { getUserByEmail, getUserById } from "../data/user";
-import { GetTeamById } from "../data/team";
-import { FetchTask } from "../data/fetch-task";
-import { getLeaveRequestByDate } from "../data/fetch-leaveRequest";
-import { getAttendanceByIdAndDate } from "../data/fetch-attendance";
 import { createAttendence } from "./create-attendence";
 import { revalidatePath } from "next/cache";
 import { createAttendenceBackDated } from "./create-attendenceBackdated";
@@ -32,64 +14,56 @@ export const StartWorkAction = async (
 ) => {
   const validateField = StartWorkSchema.safeParse(value);
 
-  const user = await auth();
-  const userId = user?.user.id || "";
-
   if (!validateField.success) {
     return { error: "invalid field" };
   }
+
   const { title, description, startAt, endAt, typeOfWork } = validateField.data;
-
-  //   TODO วันปัจจุบัน
-  const now = startOfDay(new Date());
-  //   TODO วันที่ผู้ใช้เลือก
+  const now = new Date();
   const startAtDate = startOfDay(new Date(startAt));
-  //   TODO กำหนดค่า createAt and status ตามวันทีที่เลือก เพื่อตรวจสอบว่างานที่สร้าง เป็นงานปัจจุบัน หรืองานย้อนหลัง
-  const createAt = isBefore(startAtDate, now)
-    ? CreateAt.Backdate
-    : CreateAt.Normal;
+  const endAtDate = new Date(endAt);
 
-  const checkDateStart = new Date(startAt);
-  const checkDateEnd = new Date(endAt);
-
-  if (checkDateEnd < checkDateStart) {
-    return {
-      error: "Make sure you fill in information about the date correctly",
-    };
+  // ตรวจสอบช่วงวันที่
+  if (endAtDate < startAtDate) {
+    return { error: "The end date must be after the start date" };
   }
 
+  // ตรวจสอบการสร้างงานในอนาคต
   if (isAfter(startAtDate, now)) {
     return { error: "You cannot create tasks for future dates" };
   }
 
-  // TODO ใช้สำหรับการเช็คเวลาลงชื่อ
-  const today = new Date();
+  const user = await auth();
+  const userId = user?.user.id || "";
 
+  // ค้นหา `id` จาก `userId`
   const teamMember = await db.teamMember.findFirst({
     where: { userId: userId },
+    select: { id: true },
   });
 
   if (!teamMember) {
     return { error: "Team member not found" };
   }
 
+  const createAt = isBefore(startAtDate, startOfDay(now))
+    ? CreateAt.Backdate
+    : CreateAt.Normal;
+
+  // ตรวจสอบงานที่มีอยู่แล้ว
   const existingTask = await db.task.findFirst({
     where: {
       teamMemberId: teamMember.id,
-      startAt: startAt,
+      startAt,
     },
   });
 
   if (existingTask) {
-    if (createAt === CreateAt.Normal) {
-      return {
-        error: "You can only create one task per day for the current day",
-      };
-    } else {
-      return {
-        error: "You can only create one task per day for backdated tasks",
-      };
-    }
+    const errorMsg =
+      createAt === CreateAt.Normal
+        ? "คุณสามารถสร้างงานได้เพียงงานเดียวต่อวันสำหรับวันที่ปัจจุบัน"
+        : "คุณสามารถสร้างงานได้เพียงงานเดียวต่อวันสำหรับงานย้อนหลัง";
+    return { error: errorMsg };
   }
 
   await db.task.create({
@@ -99,22 +73,19 @@ export const StartWorkAction = async (
       typeOfWork,
       startAt,
       endAt,
-      createAt: createAt,
+      createAt,
       status: StatusTask.pending,
       teamMemberId: teamMember.id,
-      dateCreateAt: new Date(),
+      dateCreateAt: now,
     },
   });
 
-  if (createAt === "Normal") {
-    await createAttendence(teamMember.id, today); // ใช้เวลาปัจจุบัน
-  } else if (createAt === "Backdate") {
-    // ลงชื่อย้อนหลังหากงานเป็นงานย้อนหลัง
-    await createAttendenceBackDated(teamMember.id, startAt, endAt); // ใช้เวลาที่กำหนดในงาน
+  if (createAt === CreateAt.Normal) {
+    await createAttendence(teamMember.id, now);
+  } else {
+    await createAttendenceBackDated(teamMember.id, startAt, endAt);
   }
 
   revalidatePath("/");
-  return {
-    success: ` success create Task`,
-  };
+  return { success: "Create task success" };
 };

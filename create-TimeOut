@@ -7,9 +7,8 @@ import { revalidatePath } from "next/cache";
 import { sendMailWithTimeOut } from "../src/lib/sendMail_TimeOut";
 import { getUserById } from "../data/user";
 import { differenceInHours, endOfDay, startOfDay } from "date-fns";
-import { GetSupervisorById } from "../data/supervisor";
+import { GetAdminByTeamId, GetSupervisorById } from "../data/supervisor";
 import { GetTeamById } from "../data/team";
-import { Attendance } from "@prisma/client";
 
 export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
   // Validate the input using Zod schema
@@ -60,6 +59,7 @@ export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
               },
             },
           },
+
           StartAt: true,
           endAt: true,
         },
@@ -87,15 +87,24 @@ export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
     new Date(startAt || ""),
   );
 
-  const updateData =
-    hoursWorked < 4
-      ? { dateOut, type: Attendance.Absent } // Use the enum value instead of a plain string
-      : { dateOut };
+  // TODO : กรณีที่ทำงานไม่ถึง 4 ชั่วโมงต่อวัน แล้วมีการลงชื่อ = ขาด
+  if (hoursWorked < 4) {
+    await db.attendance.update({
+      where: {
+        id,
+      },
+      data: {
+        dateOut,
+        type: "Absent",
+      },
+    });
+  }
 
   await db.attendance.update({
     where: { id },
-    data: updateData,
+    data: { dateOut },
   });
+
   const taskToday = await db.task.findMany({
     where: {
       teamMemberId: attendance.teamMember.id,
@@ -113,12 +122,10 @@ export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
     };
   }
 
-  const [team, supervisor] = await Promise.all([
-    GetTeamById(user?.user.id || ""),
-    GetSupervisorById(user?.user.id || ""),
-  ]);
+  const team = await GetTeamById(user?.user.id || "");
+  const emailAdmin = (await team?.admin?.email) || " ";
+  const supervisor = await GetSupervisorById(user?.user.id || "");
 
-  const emailAdmin = team?.admin?.email || " ";
   const checkUser = await db.teamMember.findFirst({
     where: {
       userId: attendance.teamMember.userId,
@@ -128,19 +135,46 @@ export async function UpdateTimeOut(value: z.infer<typeof TimeOutWorkSchema>) {
     },
   });
 
-  // ส่งเมล
-  await sendMailWithTimeOut(
-    emailAdmin,
-    dataUser.username || "Unknown",
-    dataUser.first_name || "Unknown",
-    dataUser.last_name || "Unknown",
-    dataUser.department || "Unknown",
-    team?.project || "Unknown",
-    startAt,
-    endAt,
-    taskToday.map((task) => ({ title: task.title, status: task.status })),
-    updateData.type || "Checked Out",
-  );
+  const supervisorEmail = supervisor?.email || null;
+
+  if (!emailAdmin && !supervisorEmail) {
+    return { error: "No recipients defined" };
+  }
+
+  if (checkUser?.isSupervisor && emailAdmin) {
+    await sendMailWithTimeOut(
+      emailAdmin,
+      dataUser.username || "",
+      dataUser.first_name || "",
+      dataUser.last_name || "",
+      dataUser.department || "",
+      attendance.teamMember.team?.project || "",
+      attendance.dateIn,
+      attendance.dateOut,
+      taskToday.map((task) => ({
+        title: task.title,
+        status: task.status,
+      })), // ส่งข้อมูล tasks ที่ถูกต้อง
+      attendance.type,
+    );
+  }
+  if (supervisorEmail) {
+    await sendMailWithTimeOut(
+      supervisorEmail,
+      dataUser.username || "",
+      dataUser.first_name || "",
+      dataUser.last_name || "",
+      dataUser.department || "",
+      attendance.teamMember.team?.project || "",
+      attendance.dateIn,
+      attendance.dateOut,
+      taskToday.map((task) => ({
+        title: task.title,
+        status: task.status,
+      })), // ส่งข้อมูล tasks ที่ถูกต้อง
+      attendance.type,
+    );
+  }
 
   revalidatePath("/");
   return { success: "Check-out successful" };

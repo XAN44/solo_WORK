@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createTeamSchema } from "../schema/validateCreate_Team";
 import { db } from "../src/lib/db";
 import { useCurrentLevel } from "../src/lib/auth";
-import { isBefore, parse, parseISO, startOfDay } from "date-fns";
+import { isBefore, startOfDay } from "date-fns";
 import { auth } from "../auth";
 import { sendEmailWhenAdminCreateTeam } from "../src/lib/sendMail_CreateTeam";
 
@@ -13,6 +13,7 @@ export const CreateTeamByAdmin = async (
 ) => {
   const session = await useCurrentLevel();
   const user = await auth();
+
   if (session !== "Admin") {
     return null;
   }
@@ -27,9 +28,9 @@ export const CreateTeamByAdmin = async (
     validateField.data;
 
   try {
-    // ! ถ้าเวลาจบงานสิ้นสุดก่อนวันเริ่มงาน ให้ error ออกมา
+    // ตรวจสอบวันที่
     if (endAt <= startAt) {
-      return { error: "end date must be after start date  " };
+      return { error: "end date must be after start date" };
     }
 
     const today = startOfDay(new Date());
@@ -37,74 +38,59 @@ export const CreateTeamByAdmin = async (
       return { error: "Start date cannot be in the past" };
     }
 
-    //  TODO อัพเดทสิทธิ์ผู้ใช้เป็น supervisor
-    await db.user.update({
-      where: {
-        id: supervisor,
-      },
-      data: {
-        level: "Supervisor",
-      },
-    });
-    // TODO : อัพเดท supervrisor ให้กับ member
-    await db.user.updateMany({
-      where: {
-        id: {
-          in: member.map((userId) => userId.value),
+    const adminId = user?.user.id;
+
+    // อัพเดทสิทธิ์ผู้ใช้เป็น Supervisor และอัพเดท Supervisor ให้กับสมาชิก
+    const [supervisorUpdate, memberUpdate, teamCreate] = await Promise.all([
+      db.user.update({
+        where: { id: supervisor },
+        data: { level: "Supervisor" },
+      }),
+      db.user.updateMany({
+        where: {
+          id: {
+            in: member.map((userId) => userId.value),
+          },
         },
-      },
-      data: {
-        supervisorId: supervisor,
-      },
-    });
-
-    const adminId = await user?.user.id;
-
-    // TODO : สร้างทีม
-    await db.team.create({
-      data: {
-        department,
-        project,
-        startAt,
-        endAt,
-        detail,
-        adminId,
-        member: {
-          create: [
-            {
-              userId: supervisor,
-              isSupervisor: true,
-              StartAt: startAt,
-              endAt: endAt,
-            },
-            ...member.map((userId) => ({
-              userId: userId.value,
-              isSupervisor: false,
-              StartAt: startAt,
-              endAt: endAt,
-            })),
-          ],
+        data: { supervisorId: supervisor },
+      }),
+      db.team.create({
+        data: {
+          department,
+          project,
+          startAt,
+          endAt,
+          detail,
+          adminId,
+          member: {
+            create: [
+              {
+                userId: supervisor,
+                isSupervisor: true,
+                StartAt: startAt,
+                endAt: endAt,
+              },
+              ...member.map((userId) => ({
+                userId: userId.value,
+                isSupervisor: false,
+                StartAt: startAt,
+                endAt: endAt,
+              })),
+            ],
+          },
         },
-      },
-    });
+      }),
+    ]);
 
+    // ดึงข้อมูลผู้ใช้ที่เกี่ยวข้องทั้งหมดพร้อมกัน
     const allUser = [supervisor, ...member.map((userId) => userId.value)];
     const users = await db.user.findMany({
-      where: {
-        id: {
-          in: allUser,
-        },
-      },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-      },
+      where: { id: { in: allUser } },
+      select: { id: true, email: true, username: true },
     });
 
-    // TODO : หาผู้ใช้ที่เป็น supervisor
+    // ค้นหาข้อมูลที่จำเป็น
     const supervisorUser = users.find((user) => user.id === supervisor);
-    // TODO : หาผู้ใช้ที่ไม่ได้เป็น Supervisor
     const teamMembers = users.filter((user) => user.id !== supervisor);
 
     const emails = users
@@ -113,6 +99,7 @@ export const CreateTeamByAdmin = async (
         (email): email is string => email !== null && email !== undefined,
       );
 
+    // ส่งอีเมล
     await sendEmailWhenAdminCreateTeam(
       emails,
       project,
@@ -128,10 +115,12 @@ export const CreateTeamByAdmin = async (
       startAt,
       endAt,
     );
+
     return {
       success: "Successfully system will send an email to the team members.",
     };
   } catch (error) {
-    return null;
+    console.error("Error creating team:", error);
+    return { error: "An error occurred while creating the team" };
   }
 };
