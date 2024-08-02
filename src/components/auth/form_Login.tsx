@@ -80,6 +80,9 @@ export default function Form_LOGIN() {
             duration: 4000,
           },
         );
+        if (data.success) {
+          router.prefetch("/dashboard");
+        }
       });
     });
   };

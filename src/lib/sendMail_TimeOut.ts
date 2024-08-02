@@ -24,8 +24,6 @@ export const sendMailWithTimeOut = async (
 ) => {
   const now = new Date();
 
-  const formatDate = format(now, "dd MMMM yyyy 'at' hh:mm a", { locale: enUS });
-
   const formatStartAt = format(new Date(startAt || ""), "dd MMM yyyy HH:mm a", {
     locale: enUS,
   });

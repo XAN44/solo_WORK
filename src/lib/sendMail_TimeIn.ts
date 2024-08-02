@@ -1,7 +1,6 @@
 import nodemailer from "nodemailer";
-import { format } from "date-fns-tz";
-import { enUS, th } from "date-fns/locale";
-import { CreateAt } from "@prisma/client";
+import { format, toZonedTime } from "date-fns-tz";
+import { enUS } from "date-fns/locale";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -20,10 +19,16 @@ export const sendMailWithTimeIn = async (
   department: string,
   startAt: Date | null,
 ) => {
-  const now = new Date();
+  // ใช้เขตเวลาที่ต้องการ (เช่น 'Asia/Bangkok')
+  const timeZone = "Asia/Bangkok";
 
-  const formatStartAt = format(new Date(startAt || ""), "dd MMM yyyy HH:mm a", {
+  // แปลงเวลาจาก UTC เป็นเขตเวลาของผู้ใช้
+  const zonedDate = toZonedTime(startAt || "", timeZone);
+
+  // ฟอร์แมตเวลาให้ตรงกับเขตเวลา
+  const formatStartAt = format(zonedDate, "dd MMM yyyy HH:mm a", {
     locale: enUS,
+    timeZone,
   });
 
   const mailOptions = {
