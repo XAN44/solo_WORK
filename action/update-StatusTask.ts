@@ -103,14 +103,22 @@ export async function UpdateStatusTask(
         });
       }
     }
+    // Store previous status before updating
+    const lastData = { status: task.status };
 
     await db.task.update({
       where: { id },
       data: { status },
     });
 
-    // Optionally send an email notification if needed
-    // await sendWithApproveTask(...);
+    await sendWithApproveTask(
+      task.teamMember?.user?.last_name || "",
+      task.teamMember?.user?.first_name || "",
+      task.teamMember?.user?.last_name || "",
+      task.title,
+      task.description,
+      lastData?.status, // Include lastData status
+    );
 
     revalidatePath("/profile");
     return { success: "Success" };

@@ -1,3 +1,4 @@
+export const maxDuration = 60;
 import React from "react";
 
 import SumaryTask from "../../../../../../components/ui/allTask/sumaryTask";
