@@ -1,4 +1,5 @@
 "use server";
+import { revalidatePath } from "next/cache";
 import { db } from "../src/lib/db";
 
 export async function FetchAllTaskAndAtten(teamMemberId: string) {
@@ -16,6 +17,7 @@ export async function FetchAllTaskAndAtten(teamMemberId: string) {
       },
     },
   });
+  revalidatePath("/");
 
   return data;
 }

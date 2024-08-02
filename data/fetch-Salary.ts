@@ -2,6 +2,7 @@
 
 import { db } from "../src/lib/db";
 import { currentUser } from "../src/lib/auth";
+import { revalidatePath } from "next/cache";
 
 export async function FetchDataSumary(id: string) {
   // ดึงข้อมูลยอดเงินสะสมจากฐานข้อมูล
@@ -19,6 +20,8 @@ export async function FetchDataSumary(id: string) {
     (sum, entry) => sum + entry.amount,
     0,
   );
+
+  revalidatePath("/");
 
   return {
     totalAmount, // ส่งคืนยอดรวมของยอดเงินสะสม
