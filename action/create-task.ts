@@ -61,31 +61,39 @@ export const StartWorkAction = async (
   if (existingTask) {
     const errorMsg =
       createAt === CreateAt.Normal
-        ? "คุณสามารถสร้างงานได้เพียงงานเดียวต่อวันสำหรับวันที่ปัจจุบัน"
-        : "คุณสามารถสร้างงานได้เพียงงานเดียวต่อวันสำหรับงานย้อนหลัง";
+        ? "You can create only one task per day for the current date"
+        : "You can create only one job per day for retrospective jobs";
     return { error: errorMsg };
   }
 
-  await db.task.create({
-    data: {
-      title,
-      description,
-      typeOfWork,
-      startAt,
-      endAt,
-      createAt,
-      status: StatusTask.pending,
-      teamMemberId: teamMember.id,
-      dateCreateAt: now,
-    },
-  });
+  // สร้างงานและสร้างการเข้าร่วมพร้อมกัน
+  try {
+    await db.task.create({
+      data: {
+        title,
+        description,
+        typeOfWork,
+        startAt,
+        endAt,
+        createAt,
+        status: StatusTask.pending,
+        teamMemberId: teamMember.id,
+        dateCreateAt: now,
+      },
+    });
 
-  if (createAt === CreateAt.Normal) {
-    await createAttendence(teamMember.id, now);
-  } else {
-    await createAttendenceBackDated(teamMember.id, startAt, endAt);
+    const createAttendencePromise =
+      createAt === CreateAt.Normal
+        ? createAttendence(teamMember.id, now)
+        : createAttendenceBackDated(teamMember.id, startAt, endAt);
+
+    // ใช้ Promise.all สำหรับการทำงานที่สามารถทำได้พร้อมกัน
+    await Promise.all([createAttendencePromise]);
+
+    revalidatePath("/");
+    return { success: "Create task success" };
+  } catch (error) {
+    console.error("StartWorkAction error:", error);
+    return { error: "An unexpected error occurred" };
   }
-
-  revalidatePath("/");
-  return { success: "Create task success" };
 };
