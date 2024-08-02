@@ -80,13 +80,13 @@ export default function DetalTabel({ isOpen, onClose, teams }: Data) {
                   <TableCaption>A list of your team</TableCaption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>no</TableHead>
-                      <TableHead>username</TableHead>
-                      <TableHead>role</TableHead>
-                      <TableHead>job</TableHead>
+                      <TableHead>No.</TableHead>
+                      <TableHead>Username</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Job</TableHead>
                       <TableHead>Time In</TableHead>
                       <TableHead>Time Out</TableHead>
-                      <TableHead>action</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

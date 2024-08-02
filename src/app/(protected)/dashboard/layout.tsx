@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { User } from "../../../types/modalSumary";
 import { auth } from "../../../../auth";
 import dynamic from "next/dynamic";
+import Btn_signOut from "../../../components/auth/btn_signOut";
 
 const Sidebar = dynamic(
   () => import("../../../components/ui/sidebar/Sidebar"),
@@ -33,7 +34,9 @@ export default async function Protect_Layout({
   if (error || !success) {
     // ถ้าหากเกิดข้อผิดพลาด หรือไม่มีข้อมูลผู้ใช้
     return (
-      <div className="skeleton fixed left-2 top-2 h-11 w-11 rounded-full"></div>
+      <div className="skeleton fixed left-2 top-2 h-11 w-11 rounded-full">
+        <Btn_signOut />
+      </div>
     );
   }
 

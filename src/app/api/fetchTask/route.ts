@@ -38,6 +38,7 @@ export async function GET(req: Request, res: Response) {
     (sum, entry) => sum + entry.amount,
     0,
   );
+  console.log("Fetched Data:", data);
 
   return NextResponse.json({ totalAmount, tasks: data.task });
 }

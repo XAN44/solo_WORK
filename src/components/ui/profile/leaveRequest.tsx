@@ -30,7 +30,7 @@ export default function LeaveRequest() {
           className="flex h-full w-full flex-col items-center justify-center"
         >
           <LuPlus className="ml-2 h-10 w-10" />
-          <h1 className="text-lg">leave quest</h1>
+          <h1 className="text-lg">Leave request</h1>
         </motion.div>
       </motion.div>
 

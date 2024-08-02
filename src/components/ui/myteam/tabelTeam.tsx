@@ -52,7 +52,7 @@ export default function TabelTeam({ teams }: Team) {
           <TableCaption>A list of your team</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>no</TableHead>
+              <TableHead>No.</TableHead>
               <TableHead>Project</TableHead>
               <TableHead>Department</TableHead>
               <TableHead>Start Date</TableHead>
@@ -61,14 +61,14 @@ export default function TabelTeam({ teams }: Team) {
               <TableHead>Members</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="hover:cursor-pointer">
             {teams.map((data, i) => (
               <TableRow
                 key={data.project}
                 onClick={() => handleOpen(data)}
                 className="hover:bg-violet-100"
               >
-                <TableCell className="font-medium">{i}</TableCell>
+                <TableCell className="font-medium">{i + 1}</TableCell>
                 <TableCell>{data.project}</TableCell>
                 <TableCell>{data.department}</TableCell>
                 <TableCell>

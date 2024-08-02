@@ -39,7 +39,7 @@ export default function SummaryTask({ amout }: Props) {
         <Table>
           <TableCaption>
             <p>A list of tasks</p>
-            <p>{amout.totalAmount} Bath</p>
+            <p>{amout.totalAmount} Baht</p>
           </TableCaption>
           <TableHeader>
             <TableRow>

@@ -192,16 +192,16 @@ export async function UpdateStatusTask(
       },
     });
 
-    if (lastData) {
-      await sendWithApproveTask(
-        task.teamMember?.user?.last_name || "",
-        task.teamMember?.user?.first_name || "",
-        task.teamMember?.user?.last_name || "",
-        task.title,
-        task.description,
-        lastData?.status,
-      );
-    }
+    // if (lastData) {
+    //   await sendWithApproveTask(
+    //     task.teamMember?.user?.last_name || "",
+    //     task.teamMember?.user?.first_name || "",
+    //     task.teamMember?.user?.last_name || "",
+    //     task.title,
+    //     task.description,
+    //     lastData?.status,
+    //   );
+    // }
 
     revalidatePath("/");
     return { success: "Success" };
