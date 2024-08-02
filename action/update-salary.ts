@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { AccumulationSettingsSchema } from "../schema/validateSalary";
 import { db } from "../src/lib/db";
+import { revalidatePath } from "next/cache";
 
 export const UpdateSalary = async (
   value: z.infer<typeof AccumulationSettingsSchema>,
@@ -42,6 +43,7 @@ export const UpdateSalary = async (
         },
       });
     }
+    revalidatePath("/");
 
     return { success: "Salary settings updated successfully" };
   } catch (error) {
