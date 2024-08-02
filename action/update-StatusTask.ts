@@ -48,6 +48,7 @@ export async function UpdateStatusTask(
     });
 
     const isSupervisor = user?.user.level === "Supervisor";
+    const previousStatus = task.status;
 
     if (task.teamMember?.id !== userId && !isAdmin && !isSupervisor) {
       return { error: "You are not authorized to update this task" };
@@ -103,25 +104,28 @@ export async function UpdateStatusTask(
         });
       }
     }
-    // Store previous status before updating
-    // const lastData = { status: task.status };
 
     await db.task.update({
       where: { id },
       data: { status },
     });
 
-    // await sendWithApproveTask(
-    //   task.teamMember?.user?.last_name || "",
-    //   task.teamMember?.user?.first_name || "",
-    //   task.teamMember?.user?.last_name || "",
-    //   task.title,
-    //   task.description,
-    //   lastData?.status, // Include lastData status
-    // );
+    // Fetch accumulated amount after task update
+    const accumulatedAmount = await db.accumulatedAmount.findFirst({
+      where: { teamMemberId: task.teamMemberId || "" },
+    });
+
+    await sendWithApproveTask(
+      task.teamMember?.user?.last_name || "",
+      task.teamMember?.user?.first_name || "",
+      task.teamMember?.user?.last_name || "",
+      task.title,
+      task.description,
+      previousStatus,
+    );
 
     revalidatePath("/profile");
-    return { success: "Success" };
+    return { success: "Success", accumulatedAmount };
   } catch (error) {
     return { error: "An unexpected error occurred" };
   }

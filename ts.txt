@@ -1,54 +1,23 @@
+
 import React from "react";
 
-import { getProfileTeamById } from "../../../../data/user";
-import Admin from "../../../components/ui/dashboard/admin";
-import LevelGate from "../../auth/Level-Gate";
-import { UserLevel } from "@prisma/client";
-import Attendence from "../../../components/ui/dashboard/attendence";
-import YourProfile from "../../../components/ui/dashboard/Profile";
-import { currentUser } from "../../../lib/auth";
-import ConfigSalary from "../../../components/ui/dashboard/configSalary";
-import JoinTeam from "../../../components/ui/dashboard/joinTeam";
-import { FetchTeam } from "../../../../data/fetchTeam-CLoseJoin";
+import SumaryTask from "../../../../../../components/ui/allTask/sumaryTask";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTasks } from "../../../../../../../actionAPi/fetch";
+import { ClipLoader } from "react-spinners";
+import { FetchAllTaskAndAtten } from "../../../../../../../data/fetch-taskAndAtten";
+import { FetchDataSumary } from "../../../../../../../data/fetch-Salary";
 
-async function Page() {
-  const user = await currentUser();
-  const data = await getProfileTeamById(user?.id || "");
-  const userTeamMembership = await FetchTeam();
+export default async function Page({ params }: { params: { id: string } }) {
+  const data = await FetchAllTaskAndAtten(params.id);
+  const amount = await FetchDataSumary(params.id);
+  if (!data) {
+    return <div>No data found.</div>;
+  }
 
-  return (
-    <div className="h-full w-full">
-      <div className="flex flex-col space-y-3 md:flex-row md:space-x-3 md:space-y-0">
-        <LevelGate allowedLevel={UserLevel.Admin}>
-          <Admin />
-        </LevelGate>
-        {userTeamMembership ? <Attendence /> : null}
-        <LevelGate allowedLevel={UserLevel.Admin}>
-          <Attendence />
-        </LevelGate>
-        {data?.id ? (
-          <>
-            <YourProfile id={data?.id || ""} />
-          </>
-        ) : null}
-
-        <LevelGate allowedLevel={UserLevel.Admin}>
-          <ConfigSalary />
-        </LevelGate>
-        <LevelGate allowedLevel={UserLevel.General}>
-          {userTeamMembership ? null : (
-            <div className=" ">
-              <h1 className="mb-3">
-                You don`t have a team yet. Make a team selection to display
-                additional content.
-              </h1>
-              <JoinTeam />
-            </div>
-          )}
-        </LevelGate>
-      </div>
-    </div>
-  );
+  const amout = {
+    totalAmount: amount.totalAmount, // Ensure this is correct
+    tasks: data.task || [],
+  };
+  return <SumaryTask amout={amout} />;
 }
-
-export default Page;

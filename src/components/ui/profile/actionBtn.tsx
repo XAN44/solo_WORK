@@ -18,12 +18,12 @@ import {
   SelectValue,
 } from "../select";
 import { SelectStatusWork } from "../../../lib/selectTaskStatus";
-import { UpdateStatusTask } from "../../../../action/update-StatusTask";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { MdError } from "react-icons/md";
 import { GiConfirmed } from "react-icons/gi";
 import { ClipLoader } from "react-spinners";
+import { UpdateStatusTask } from "../../../../action/update-StatusTask";
 
 interface Model {
   id: string;
