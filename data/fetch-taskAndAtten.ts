@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "../src/lib/db";
 
-export async function FetchAllTaskAndAtten(teamMemberId: string) {
+export async function FetchAllTaskk(teamMemberId: string) {
   // ดึงข้อมูลจากตาราง task และ attendance
   const data = await db.teamMember.findUnique({
     where: {
@@ -10,7 +10,6 @@ export async function FetchAllTaskAndAtten(teamMemberId: string) {
     },
     include: {
       task: {
-        // Assuming that you have a relation called tasks
         orderBy: {
           startAt: "asc",
         },

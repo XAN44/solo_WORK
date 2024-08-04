@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import clsx from "clsx";
@@ -15,16 +15,34 @@ import {
 } from "../table";
 import { task } from "@prisma/client";
 import { exportTasksToExcel } from "../../../lib/excel";
-import { UseCurrentUser } from "../../../../hooks/use-curret-user";
+import { Button } from "../button";
+import EditTaskModal from "../profile/editTask";
 
 interface Props {
   amout: {
     totalAmount: number;
     tasks: task[];
+    memberId: string;
   };
+  currentUserId: string;
 }
 
-export default function SummaryTask({ amout }: Props) {
+export default function SummaryTask({ amout, currentUserId }: Props) {
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+
+  const handleEditTask = (taskId: string) => {
+    setEditingTaskId(taskId);
+  };
+
+  const handleCloseModal = () => {
+    setEditingTaskId(null);
+  };
+
+  const [currentTask, setCurrentTask] = useState<{
+    title: string;
+    description: string;
+  } | null>(null);
+
   return (
     <div className="h-full w-full">
       <h1 className="text-xl font-bold">Summary of Tasks</h1>
@@ -88,11 +106,32 @@ export default function SummaryTask({ amout }: Props) {
                 </TableCell>
                 <TableCell>
                   <ActionBtn_AllTask id={task.id!} />
+                  {amout.memberId === currentUserId && (
+                    <Button
+                      onClick={() => handleEditTask(task.id!)}
+                      className="ml-2 bg-green-500 text-white"
+                    >
+                      Edit Task
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        {editingTaskId && (
+          <EditTaskModal
+            taskId={editingTaskId}
+            onClose={handleCloseModal}
+            descriptTion={
+              amout.tasks.find((task) => task.id === editingTaskId)
+                ?.description || ""
+            }
+            title={
+              amout.tasks.find((task) => task.id === editingTaskId)?.title || ""
+            }
+          />
+        )}
       </div>
     </div>
   );
