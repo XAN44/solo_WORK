@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 
-export const exportTasksToExcel = (tasksData: any[]) => {
+export const exportTasksToExcel = (tasksData: any[], totalAmount: number) => {
   // แปลงข้อมูล tasks เป็น sheet ของ Excel
   const worksheet = XLSX.utils.json_to_sheet(
     tasksData.map((task, index) => ({
@@ -28,6 +28,25 @@ export const exportTasksToExcel = (tasksData: any[]) => {
       "Task Type": task.createAt,
     })),
   );
+
+  // เพิ่มยอดเงินรวมในแถวสุดท้าย
+  const totalRow = [
+    {
+      No: "",
+      Title: "Total Amount",
+      Description: "",
+      "Type of Work": "",
+      "Task CreateAt": "",
+      "Task Start": "",
+      "Task End At": "",
+      Status: "",
+      "Task Type": totalAmount,
+    },
+  ];
+  XLSX.utils.sheet_add_json(worksheet, totalRow, {
+    skipHeader: true,
+    origin: -1,
+  });
 
   // สร้าง workbook ใหม่และเพิ่ม worksheet
   const workbook = XLSX.utils.book_new();

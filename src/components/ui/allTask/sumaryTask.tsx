@@ -30,7 +30,7 @@ export default function SummaryTask({ amout }: Props) {
       <h1 className="text-xl font-bold">Summary of Tasks</h1>
       <div className="flex flex-col p-3">
         <button
-          onClick={() => exportTasksToExcel(amout.tasks)}
+          onClick={() => exportTasksToExcel(amout.tasks, amout.totalAmount)}
           className="mb-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
           Download as Excel

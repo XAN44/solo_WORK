@@ -112,16 +112,16 @@ export async function UpdateStatusTask(
       where: { teamMemberId: task.teamMemberId || "" },
     });
 
-    if (status === StatusTask.Completed || status === StatusTask.Cancelled) {
-      await sendWithApproveTask(
-        task.teamMember?.user?.email || "",
-        task.teamMember?.user?.first_name || "",
-        task.teamMember?.user?.last_name || "",
-        task.title,
-        task.description,
-        status,
-      );
-    }
+    // if (status === StatusTask.Completed || status === StatusTask.Cancelled) {
+    //   await sendWithApproveTask(
+    //     task.teamMember?.user?.email || "",
+    //     task.teamMember?.user?.first_name || "",
+    //     task.teamMember?.user?.last_name || "",
+    //     task.title,
+    //     task.description,
+    //     status,
+    //   );
+    // }
 
     revalidatePath("/profile");
     return { success: "Success", accumulatedAmount };

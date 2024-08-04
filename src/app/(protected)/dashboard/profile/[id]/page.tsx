@@ -12,18 +12,23 @@ import { UseCurrentUser } from "../../../../../../hooks/use-curret-user";
 
 export default function Page({ params }: { params: { id: string } }) {
   // ดึงข้อมูลผู้ใช้ที่เป็นหน้าโปรไฟล์
-
-  const { data, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading: isDataLoading,
+    error,
+  } = useQuery({
     queryKey: ["Profile", params.id],
     queryFn: () => fetchMemberId(params.id),
   });
+
+  const current = UseCurrentUser();
+  const isCurrentLoading = !current;
 
   if (error) {
     return <>{error}</>;
   }
 
-  const current = UseCurrentUser();
-  if (isLoading) {
+  if (isDataLoading || isCurrentLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <ClipLoader />
@@ -31,7 +36,6 @@ export default function Page({ params }: { params: { id: string } }) {
     );
   }
 
-  // ดึงข้อมูลผู้ใช้ที่เข้าสู่ระบบ
   if (!current) {
     return <div>Unauthorized</div>;
   }
