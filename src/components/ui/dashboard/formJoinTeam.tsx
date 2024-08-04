@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../select";
+import { useRouter } from "next/navigation";
 
 type User = {
   id: string;
@@ -59,6 +60,8 @@ export default function FormJoinTeam() {
     },
     mode: "onChange",
   });
+
+  const router = useRouter();
 
   const [model, setModel] = useState<Team[]>([]);
   const [buttonText, setButtonText] = useState("Join Team");
@@ -104,6 +107,9 @@ export default function FormJoinTeam() {
             duration: 4000,
           },
         );
+        if (data.success) {
+          router.refresh();
+        }
       });
     });
   };

@@ -92,5 +92,5 @@ export async function JoinTeamAction(value: z.infer<typeof JoinTeam>) {
   }
 
   revalidatePath("/");
-  return { success: `${supervisor?.username}` };
+  return { success: "Successfully joined as a member within the team" };
 }
