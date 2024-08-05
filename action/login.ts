@@ -41,11 +41,12 @@ export const LoginAction = async (value: z.infer<typeof SignInSchema>) => {
     await signIn("credentials", {
       username,
       password,
-      redirect: false,
+      redirect: true,
+      redirectTo: "/dashboard",
     });
 
     return {
-      success: "",
+      success: "Sign-in success",
     };
   } catch (error) {
     if (error instanceof AuthError) {
