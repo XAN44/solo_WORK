@@ -65,7 +65,7 @@ export default function SummaryTask({ amout, currentUserId }: Props) {
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Type of Work</TableHead>
-              <TableHead>Task CreateAt</TableHead>
+              <TableHead>Task Create At</TableHead>
               <TableHead>Task Start</TableHead>
               <TableHead>Task End At</TableHead>
               <TableHead>Task Status</TableHead>

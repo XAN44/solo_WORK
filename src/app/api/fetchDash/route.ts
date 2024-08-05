@@ -5,7 +5,6 @@ import { currentUser } from "../../../lib/auth";
 
 export async function GET(req: Request, res: Response) {
   const user = await currentUser();
-  console.log(user);
 
   if (!user || !user.id) {
     console.log("User not found or user ID is missing.");
