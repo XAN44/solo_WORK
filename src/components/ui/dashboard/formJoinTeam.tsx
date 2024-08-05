@@ -121,7 +121,7 @@ export default function FormJoinTeam() {
   return (
     <>
       <div className="flex items-start justify-start">
-        <h1 className="p-10 text-xl font-bold md:p-3">Team List</h1>
+        <h1 className="p-10 text-xl font-bold md:p-3">Join Team</h1>
       </div>
       <div className="flex items-center justify-center p-3 text-center">
         <Form {...form}>

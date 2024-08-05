@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <Cardwarpper
       bar_title="Welcome"
-      bar_content=" "
+      bar_content="   "
       bar_sub="back to dashboard"
       href="/dashboard"
       color=""
