@@ -4,8 +4,8 @@ import Cardwarpper from "../components/ui/cardwarpper/cardwarpper";
 export default function Home() {
   return (
     <Cardwarpper
-      bar_content="I'm just kidding. Please get some rest"
-      bar_title="Work Now!"
+      bar_title="Welcome"
+      bar_content=" "
       bar_sub="back to dashboard"
       href="/dashboard"
       color=""

@@ -42,7 +42,7 @@ export const LoginAction = async (value: z.infer<typeof SignInSchema>) => {
       username,
       password,
       redirect: true,
-      redirectTo: "/dashboard",
+      redirectTo: "/",
     });
 
     return {
