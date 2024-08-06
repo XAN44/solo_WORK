@@ -112,8 +112,6 @@ export const CreateTeamByAdmin = async (
         email: supervisorUser?.email || "No email",
       },
       detail,
-      startAt,
-      endAt,
     );
 
     return {

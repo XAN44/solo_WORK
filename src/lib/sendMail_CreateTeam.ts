@@ -16,16 +16,7 @@ export const sendEmailWhenAdminCreateTeam = async (
   teamMembers: { name: string; email: string }[],
   supervisor: { name: string; email: string },
   detail: string,
-  startAt: Date,
-  endAt: Date,
 ) => {
-  const formattedStartAt = format(startAt, "dd MMMM yyyy 'at' hh:mm a ", {
-    locale: th,
-  });
-  const formattedEndAt = format(endAt, "dd MMMM yyyy 'at' hh:mm a ", {
-    locale: th,
-  });
-
   const confirmLink = `${process.env.NEXT_PUBLIC_API_URL}/dashboard/team`;
 
   const memberList = teamMembers
@@ -54,12 +45,7 @@ export const sendEmailWhenAdminCreateTeam = async (
         <ul>
           ${memberList}
         </ul>
-         <p style="color: #4b5563;">
-          ระยะเวลาเริ่มงาน: <strong>${formattedStartAt}</strong>
-        </p>
-        <p style="color: #4b5563;">
-          ระยะเวลาสิ้นสุดงาน: <strong>${formattedEndAt}</strong>
-        </p>
+ 
         <a
           href="${confirmLink}"
           style="display: inline-block; margin: 16px 0; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 4px;">

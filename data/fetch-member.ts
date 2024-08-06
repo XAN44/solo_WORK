@@ -10,10 +10,10 @@ export async function GetMember(departName: string) {
     return [];
   }
 
+  // TODO ดึงข้อมูลของผู้ใช้ตามแผนกที่มีการเลือก หรือถ้าหากต้องการแสดงเฉพาะผู้ใช้ที่ยังไม่ได้เป็น Supervisor ให้เพิ่มเงื่อนไขเข้าไปที่ where
   const user = await db.user.findMany({
     where: {
       department: departName,
-      level: "General",
     },
     select: {
       id: true,

@@ -2,8 +2,7 @@
 export const maxDuration = 60; // This function can run for a maximum of 5 seconds
 
 import React from "react";
-import { GetMember } from "../../../../../data/fetch-member";
-import { DepartMent } from "../../../../lib/select";
+
 import { SelectSuperVisor } from "../../../../components/ui/admin/select_Supervisor";
 import LevelGate from "../../../auth/Level-Gate";
 

@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-
 export const fetchTeams = async () => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/teamTabel`,

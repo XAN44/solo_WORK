@@ -23,11 +23,11 @@ export async function createAttendence(teamMemberId: string, dateIn: Date) {
   const today = new Date();
 
   const nineAm = setHours(
-    setMinutes(setSeconds(setMilliseconds(today, 0), 0), 0),
+    setMinutes(setSeconds(setMilliseconds(today, 0), 0), 30),
     9,
   );
 
-  // TODO ถ้าลงชื่อหลังจาก 9:00 ถือว่ามาสาย
+  // TODO ถ้าลงชื่อหลังจาก 9:30 ถือว่ามาสาย
   const type = dateIn > nineAm ? Attendance.Late : Attendance.Present;
 
   await db.attendance.create({
