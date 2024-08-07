@@ -14,6 +14,7 @@ export async function GetMember(departName: string) {
   const user = await db.user.findMany({
     where: {
       department: departName,
+      level: "General",
     },
     select: {
       id: true,

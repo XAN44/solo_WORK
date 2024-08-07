@@ -12,6 +12,7 @@ import Attendence from "../../../components/ui/dashboard/attendence";
 import YourProfile from "../../../components/ui/dashboard/Profile";
 import ConfigSalary from "../../../components/ui/dashboard/configSalary";
 import JoinTeam from "../../../components/ui/dashboard/joinTeam";
+import ChangeSupervisor from "../../../components/ui/dashboard/supervisorChange";
 
 function Page() {
   const user = UseCurrentUser();
@@ -37,6 +38,9 @@ function Page() {
       <div className="flex flex-col space-y-3 md:flex-row md:space-x-3 md:space-y-0">
         <LevelGate allowedLevel={UserLevel.Admin}>
           <Admin />
+        </LevelGate>
+        <LevelGate allowedLevel={UserLevel.Admin}>
+          <ChangeSupervisor />
         </LevelGate>
 
         {hasTeam || isAdmin ? <Attendence /> : null}
