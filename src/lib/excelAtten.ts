@@ -24,5 +24,5 @@ export const exportAttenToExcel = (attendanceData: any[]) => {
   XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
 
   // ดาวน์โหลดไฟล์ Excel
-  XLSX.writeFile(workbook, "Attendance_Summary.xlsx");
+  XLSX.writeFile(workbook, "Attendance.xlsx");
 };
